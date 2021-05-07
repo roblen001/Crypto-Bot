@@ -1,13 +1,24 @@
 import React, { useState } from "react"
 import TradingViewWidget from "react-tradingview-widget"
+import Binance from "binance-api-node"
 
 import "bootstrap/dist/css/bootstrap.min.css"
 
 import "./middleGraphsSection.css"
 
+const client = Binance()
+
+// Authenticated client, can make signed calls
+const client2 = Binance({
+  apiKey: process.env.GATSBY_APIKEY,
+  apiSecret: process.env.GATSBY_APISECRET,
+})
+
+// client.time().then(time => console.log(time))
+
 const MiddleGraphsSection = () => {
   const [symbol, setSymbol] = useState("BTC")
-
+  // console.log(binance.futuresPrices())
   return (
     <>
       {/* bar graph for live market section */}
@@ -90,7 +101,6 @@ const ChartSection = ({ symbol }) => {
         theme="dark"
         studies={["MACD@tv-basicstudies", "MOM@tv-basicstudies"]}
       />
-      {symbol}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 # api key
+.env.*
 .env
 
 # Logs
