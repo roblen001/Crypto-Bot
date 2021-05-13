@@ -7,6 +7,7 @@ import "./index.css"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 import MiddleGraphsSection from "../components/middleDashboard/middleGraphsSection"
+import LeftSideSection from "../components/leftSideDashboard/leftSideSection"
 
 const IndexPage = () => (
   <>
@@ -14,10 +15,7 @@ const IndexPage = () => (
     <div class="wrapper">
       {/* left side of dashboard */}
       <div className="sideColumnWrapper">
-        {/* transaction section */}
-        <div style={{ flex: 1 }}></div>
-        {/* news and sentiment analysis section */}
-        <div style={{ flex: 1 }}></div>
+        <LeftSideSection />
       </div>
       {/* middle of dashboard */}
       <div className="middleColumnWrapper">
