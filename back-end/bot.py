@@ -1,9 +1,12 @@
+from csv import writer
+import pandas as pd
 import websocket
 import json
 import pprint
 import talib
 import numpy
 import config
+import os
 from binance.client import Client
 from binance.enums import *
 
@@ -13,96 +16,108 @@ from binance.enums import *
 
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
-client = Client(config.API_KEY, config.API_SECRET)
+#  setting up the test network
+test_api = config.TEST_API_KEY
+test_secret = config.TEST_SECRET_KEY
+client = Client(test_api, test_secret)
+client.API_URL = 'https://testnet.binance.vision/api'
 
-# testing api by checking for trading fees on binance
-# print(client.get_trade_fee())
+#  GET ACCOUNT BALANCES
+# account = client.get_account()
+# balances = account['balances']
+# print(balances)
 
-RSI_PERIOD = 14
-RSI_OVERBOUGHT = 70
-RSI_OVERSOLD = 30
-TRADE_SYMBOL = 'ETHUSD'
-TRADE_QUANTITY = 0.05
-
-closes = []
-in_position = False
-
-# client = Client(config.API_KEY, config.API_SECRET, tld='us')
-
-
-def order(side, quantity, symbol, order_type=ORDER_TYPE_MARKET):
-    # try:
-    print("sending order")
-    #     order = client.create_order(
-    #         symbol=symbol, side=side, type=order_type, quantity=quantity)
-    #     print(order)
-    # except Exception as e:
-    #     print("an exception occured - {}".format(e))
-    #     return False
-
-    # return True
+# CALCULATING TOTAL PROFITS ON A TRADE
+# (selling_price - (selling_price*0.075))-(buying_price - (buying_price*0.075)) = profits in amount
+# (selling_price - (selling_price*0.075))/(buying_price - (buying_price*0.075))*100 = profits in percent
 
 
-def on_open(ws):
-    print('opened connection')
+# BUY A CURRENCY
+#  market order:A market order is an order to buy or sell a security immediately.
+#   This type of order guarantees that the order will be executed, but does not guarantee the execution price.
+#  A market order generally will execute at or near the current bid (for a sell order) or ask (for a buy order) price.
 
-# TODO: send notifications if connection closes
-    #  -it means that the server crashed and the bot is no longer running
-
-
-def on_close(ws):
-    print('closed connection')
+#  STORING TRANSACTION TO DATABASE AND BUY CRYPTO
 
 
-def on_message(ws, message):
-    global closes, in_position
-
-    print('received message')
-    json_message = json.loads(message)
-    # pprint.pprint(json_message)
-
-    candle = json_message['k']
-
-    is_candle_closed = candle['x']
-    close = candle['c']
-
-    if is_candle_closed:
-        print("candle closed at {}".format(close))
-        closes.append(float(close))
-        print("closes")
-        print(closes)
-
-        if len(closes) > RSI_PERIOD:
-            np_closes = numpy.array(closes)
-            rsi = talib.RSI(np_closes, RSI_PERIOD)
-            print("all rsis calculated so far")
-            print(rsi)
-            last_rsi = rsi[-1]
-            print("the current rsi is {}".format(last_rsi))
-
-            if last_rsi > RSI_OVERBOUGHT:
-                if in_position:
-                    print("Overbought! Sell! Sell! Sell!")
-                    # put binance sell logic here
-                    # order_succeeded = order(
-                    #     SIDE_SELL, TRADE_QUANTITY, TRADE_SYMBOL)
-                    # if order_succeeded:
-                    in_position = False
-                else:
-                    print("It is overbought, but we don't own any. Nothing to do.")
-
-            if last_rsi < RSI_OVERSOLD:
-                if in_position:
-                    print("It is oversold, but you already own it, nothing to do.")
-                else:
-                    print("Oversold! Buy! Buy! Buy!")
-                    # put binance buy order logic here
-                    # order_succeeded = order(
-                    #     SIDE_BUY, TRADE_QUANTITY, TRADE_SYMBOL)
-                    # if order_succeeded:
-                    in_position = True
+def append_list_as_row(file_name, list_of_elem):
+    # Open file in append mode
+    with open(file_name, 'a+', newline='') as write_obj:
+        # Create a writer object from csv module
+        csv_writer = writer(write_obj)
+        # Add contents of list as last row in the csv file
+        csv_writer.writerow(list_of_elem)
 
 
-ws = websocket.WebSocketApp(SOCKET, on_open=on_open,
-                            on_close=on_close, on_message=on_message)
-ws.run_forever()
+buy_order = client.create_order(
+    symbol='LTCBTC',
+    side='BUY',
+    type='MARKET',
+    quantity=3)
+
+id = buy_order['clientOrderId']
+symbol = buy_order['symbol']
+market_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
+qty = float(buy_order['fills'][0]['qty'])
+timestamp = buy_order['transactTime']
+side = buy_order['side']
+cum_market_price = market_price*qty
+#  might need to be adjusted later
+fee_percent = 0.075/100
+fee = cum_market_price*fee_percent
+
+if side == 'BUY':
+    profits = '---'
+else:
+    df = pd.read_csv("../transaction_history.csv")
+    reversed_data = df.iloc[::-1]
+    profits = 'idk'
+
+
+# assumption is that fills['price'] includes fees
+price_with_fee = cum_market_price + fee
+order_list = [id, symbol, market_price, qty, timestamp, side,
+              cum_market_price, fee, fee_percent, price_with_fee]
+print(order_list)
+
+append_list_as_row("../transaction_history.csv", order_list)
+
+# print(complete_trade_history)
+# closes = []
+# # WARNING THIS IS FOR REAL NETWORK
+# # client = Client(config.API_KEY, config.API_SECRET, tld='us')
+
+
+# def on_open(ws):
+#     print('opened connection')
+
+# # TODO: send notifications if connection closes
+#     #  -it means that the server crashed and the bot is no longer running
+
+
+# def on_close(ws):
+#     print('closed connection')
+
+
+# def on_message(ws, message):
+#     global closes
+
+#     # print('received message')
+#     json_message = json.loads(message)
+#     # pprint.pprint(json_message)
+
+#     candle = json_message['k']
+
+#     is_candle_closed = candle['x']
+#     close = candle['c']
+
+#     if is_candle_closed:
+#         print("candle closed at {}".format(close))
+#         closes.append(float(close))
+#         print("closes")
+#         print(closes)
+
+
+# ws = websocket.WebSocketApp(SOCKET, on_open=on_open,
+#                             on_close=on_close, on_message=on_message)
+# ws.run_forever()

@@ -3,196 +3,29 @@ import axios from "axios"
 import * as Icon from "react-cryptocoins"
 import moment from "moment"
 
-//  mock data: Transaction Histiory response
-const transactionHistory = {
-  rows: [
-    {
-      symbol: "LTCBTC",
-      orderId: 1,
-      clientOrderId: "myOrder1",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "LTCBTC",
-      orderId: 1,
-      clientOrderId: "myOrder1",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "LTCBTC",
-      orderId: 1,
-      clientOrderId: "myOrder2",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "SELL",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-
-    {
-      symbol: "LTCBTC",
-      orderId: 1,
-      clientOrderId: "myOrder2",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "SELL",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "LTCBTC",
-      orderId: 1,
-      clientOrderId: "myOrder2",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "SELL",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-    {
-      symbol: "ETHBTC",
-      orderId: 1,
-      clientOrderId: "myOrder3",
-      price: "0.1",
-      origQty: "1.0",
-      executedQty: "0.0",
-      status: "NEW",
-      timeInForce: "GTC",
-      type: "LIMIT",
-      side: "BUY",
-      stopPrice: "0.0",
-      icebergQty: "0.0",
-      time: 1499827319559,
-    },
-  ],
-  total: 3,
-}
-
 // TODO: restrict the amount of transactions being called on this page
 const TransactionSection = () => {
+  // fectching transaction history from flask api
+  const [transactionHistory, setTransactionHistory] = useState([])
+
+  async function fetchData() {
+    try {
+      const response = await axios.get(
+        // limit this to 10 so it can fit in container
+        "http://127.0.0.1:5000/all_transaction_history/10"
+      )
+      let data = response.data
+      setTransactionHistory(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  console.log(transactionHistory)
   return (
     <div
       style={{
@@ -223,11 +56,11 @@ const TransactionSection = () => {
           height: 2,
         }}
       ></div>
-      {transactionHistory.rows.slice(0, 10).map(transaction => {
+      {transactionHistory.map(transaction => {
         return (
           <>
             <SingleTransactionContainer
-              key={transaction.clientOrderId}
+              key={transaction.id}
               transaction={transaction}
             />
             <div
@@ -247,11 +80,14 @@ const TransactionSection = () => {
 const SingleTransactionContainer = ({ transaction }) => {
   // icon_name is reformatting transaction.symbol to be able to find the appropriate symbol
   const icon_name =
-    transaction.symbol.substring(0, 3).toLowerCase().charAt(0).toUpperCase() +
+    transaction.symbol.substring(0, 3).toLowerCase().charAt(0) +
     transaction.symbol.substring(0, 3).toLowerCase().slice(1)
-
-  // const component = string_to_component()
-  // const icon_component_in_string_format
+  const test = () => {
+    var MyComponent = "Icon." + icon_name
+    return <MyComponent />
+  }
+  console.log("hello")
+  console.log(test())
   return (
     <div
       style={{
@@ -264,7 +100,7 @@ const SingleTransactionContainer = ({ transaction }) => {
       }}
     >
       {/* Symbol icon and name */}
-      <Icon.Ltc color="white" />
+      {/* <Icon.Eth color="white" /> */}
       <div style={{ color: "white" }}>{transaction.symbol}</div>
       {/* Price */}
       <div
@@ -280,7 +116,7 @@ const SingleTransactionContainer = ({ transaction }) => {
             fontSize: 12,
           }}
         >
-          {transaction.price}
+          {transaction.price_with_fee.toFixed(2)}
         </div>
         <div style={{ color: "#98A9BC", fontSize: 12 }}>Price</div>
       </div>
@@ -298,7 +134,7 @@ const SingleTransactionContainer = ({ transaction }) => {
             fontSize: 12,
           }}
         >
-          {transaction.executedQty}
+          {parseFloat(transaction.qty).toFixed(2)}
         </div>
         <div style={{ color: "#98A9BC", fontSize: 12 }}>qty</div>
       </div>
@@ -316,7 +152,9 @@ const SingleTransactionContainer = ({ transaction }) => {
             fontSize: 12,
           }}
         >
-          {moment.unix(transaction.time / 1000).format("DD MMM YYYY hh:mm a")}
+          {moment
+            .unix(transaction.timestamp / 1000)
+            .format("DD MMM YYYY hh:mm a")}
         </div>
         <div style={{ color: "#98A9BC", fontSize: 12 }}>date and time</div>
       </div>
@@ -347,12 +185,18 @@ const SingleTransactionContainer = ({ transaction }) => {
           style={{
             width: 10,
             height: 10,
-            backgroundColor: transaction.side === "BUY" ? "#60BC3F" : "#DB3E62",
+            backgroundColor:
+              transaction.side === "SELL" ? "#60BC3F" : "#DB3E62",
             borderRadius: 25,
             marginRight: 5,
           }}
         ></div>
-        <div style={{ color: "white", fontSize: 12 }}>{transaction.side}</div>
+        {transaction.side == "BUY" && (
+          <div style={{ color: "white", fontSize: 12 }}>BUY</div>
+        )}
+        {transaction.side == "SELL" && (
+          <div style={{ color: "white", fontSize: 12 }}>SELL</div>
+        )}
       </div>
     </div>
   )
