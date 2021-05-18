@@ -100,7 +100,7 @@ const SingleTransactionContainer = ({ transaction }) => {
       }}
     >
       {/* Symbol icon and name */}
-      {/* <Icon.Eth color="white" /> */}
+      <Icon.Eth color="white" />
       <div style={{ color: "white" }}>{transaction.symbol}</div>
       {/* Price */}
       <div
@@ -166,15 +166,27 @@ const SingleTransactionContainer = ({ transaction }) => {
           alignItems: "center",
         }}
       >
-        <div
-          style={{
-            color: "white",
-            fontSize: 12,
-          }}
-        >
-          100$ (12.5%)
-        </div>
-
+        {transaction.profits === "---" && (
+          <div
+            style={{
+              color: "white",
+              fontSize: 12,
+            }}
+          >
+            {transaction.profits} ({transaction.profits_percent}%)
+          </div>
+        )}
+        {transaction.profits != "---" && (
+          <div
+            style={{
+              color: "white",
+              fontSize: 12,
+            }}
+          >
+            {parseFloat(transaction.profits).toFixed(2)} (
+            {parseFloat(transaction.profits_percent).toFixed(2)}%)
+          </div>
+        )}
         <div style={{ color: "#98A9BC", fontSize: 12 }}>gains/losses</div>
       </div>
       {/* date and time */}

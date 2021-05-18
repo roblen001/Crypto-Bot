@@ -49,35 +49,63 @@ def append_list_as_row(file_name, list_of_elem):
         csv_writer.writerow(list_of_elem)
 
 
-buy_order = client.create_order(
-    symbol='LTCBTC',
-    side='BUY',
-    type='MARKET',
-    quantity=3)
+# order = client.create_order(
+#     symbol='LTCBTC',
+#     side='BUY',
+#     type='MARKET',
+#     quantity=3)
 
-id = buy_order['clientOrderId']
-symbol = buy_order['symbol']
+order = {
+    "symbol": "LTCUSDT",
+    "orderId": 28,
+    "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+    "transactTime": 1507725176595,
+    "price": "0.00000000",
+    "origQty": "10.00000000",
+    "executedQty": "10.00000000",
+    "status": "FILLED",
+    "timeInForce": "GTC",
+    "type": "MARKET",
+    "side": "SELL",
+    "fills": [
+        {
+            "price": "4000.00000000",
+            "qty": "1.00000000",
+            "commission": "4.00000000",
+            "commissionAsset": "USDT"
+        },
+    ]
+}
+
+id = order['clientOrderId']
+symbol = order['symbol']
 market_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
-qty = float(buy_order['fills'][0]['qty'])
-timestamp = buy_order['transactTime']
-side = buy_order['side']
+qty = float(order['fills'][0]['qty'])
+timestamp = order['transactTime']
+side = order['side']
 cum_market_price = market_price*qty
 #  might need to be adjusted later
 fee_percent = 0.075/100
 fee = cum_market_price*fee_percent
+# assumption is that fills['price'] includes fees, but to be safe we do this
+price_with_fee = cum_market_price + fee
 
 if side == 'BUY':
     profits = '---'
+    profits_percent = '---'
 else:
     df = pd.read_csv("../transaction_history.csv")
     reversed_data = df.iloc[::-1]
-    profits = 'idk'
+    df_funnel = df.loc[(df['symbol'] == symbol) & (df['side'] == 'BUY')]
+    df_funnel['timestamp'] = pd.to_datetime(
+        df_funnel.timestamp, unit='ms')
+    df_funnel_most_recent_date = df_funnel.max()
+    buy_price = df_funnel_most_recent_date['price_with_fee']
+    profits = price_with_fee - buy_price
+    profits_percent = (profits/buy_price)*100
 
-
-# assumption is that fills['price'] includes fees
-price_with_fee = cum_market_price + fee
 order_list = [id, symbol, market_price, qty, timestamp, side,
-              cum_market_price, fee, fee_percent, price_with_fee]
+              cum_market_price, fee, fee_percent, price_with_fee, profits, profits_percent]
 print(order_list)
 
 append_list_as_row("../transaction_history.csv", order_list)
