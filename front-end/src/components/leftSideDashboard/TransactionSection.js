@@ -3,6 +3,13 @@ import axios from "axios"
 import * as Icon from "react-cryptocoins"
 import moment from "moment"
 
+const cryptoIcons = [
+  { symbol: "ETH", icon: <Icon.Eth color="white" /> },
+  { symbol: "LTC", icon: <Icon.Ltc color="white" /> },
+  { symbol: "XRP", icon: <Icon.Xrp color="white" /> },
+  { symbol: "BTC", icon: <Icon.Btc color="white" /> },
+]
+
 // TODO: restrict the amount of transactions being called on this page
 const TransactionSection = () => {
   // fectching transaction history from flask api
@@ -78,16 +85,8 @@ const TransactionSection = () => {
 }
 
 const SingleTransactionContainer = ({ transaction }) => {
-  // icon_name is reformatting transaction.symbol to be able to find the appropriate symbol
-  const icon_name =
-    transaction.symbol.substring(0, 3).toLowerCase().charAt(0) +
-    transaction.symbol.substring(0, 3).toLowerCase().slice(1)
-  const test = () => {
-    var MyComponent = "Icon." + icon_name
-    return <MyComponent />
-  }
-  console.log("hello")
-  console.log(test())
+  const icon_name = transaction.symbol.substring(0, 3)
+
   return (
     <div
       style={{
@@ -100,7 +99,11 @@ const SingleTransactionContainer = ({ transaction }) => {
       }}
     >
       {/* Symbol icon and name */}
-      <Icon.Eth color="white" />
+      {cryptoIcons.map(item => {
+        if (item.symbol === icon_name) {
+          return item.icon
+        }
+      })}
       <div style={{ color: "white" }}>{transaction.symbol}</div>
       {/* Price */}
       <div

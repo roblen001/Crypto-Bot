@@ -16,110 +16,45 @@ const LeftSideSection = () => {
   )
 }
 
-//  mock news data
-const newsData = [
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Positive",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "10h",
-  },
-  {
-    title:
-      "ETH Hits $3852, Raoul Pal Says Investors He Knows 'Shifting Allocation to ETH Over BTCâ€™",
-    sentiment: "Positive",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13h",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Positive",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "22h",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Positive",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-  {
-    title: "Top Three Weekend Gainers: ARRR, MATIC, and TEL",
-    sentiment: "Negative",
-    link:
-      "https://beincrypto.com/top-three-weekend-gainers-arrr-matic-and-tel/",
-    date: "13/05, 20:17",
-  },
-]
-
 const NewsSection = () => {
-  // fectching from crypto panic
-  // const [newsData, setNewsData] = useState(null)
+  const [newsFilter, setNewsFilter] = useState("top")
+  const [topNews, setTopNews] = useState([])
+  const [allNews, setAllNews] = useState([])
+  const [newsData, setNewsData] = useState([])
 
-  // async function fetchData() {
-  //   try {
-  //     const response = await axios.get(
-  //       "https://cryptopanic.com//api/v1/posts/?",
-  //       {
-  //         params: {
-  //           auth_token: process.env.GATSBY_NEWSAPIKEY,
-  //           filter: "hot",
-  //           currencies: "BTC",
-  //         },
-  //       }
-  //     )
-  //     let data = response.data.results
-  //     console.log(data)
-  //     setNewsData(data)
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }
+  async function fetchTopNews() {
+    try {
+      const response = await axios.get(
+        // limit this to 10 so it can fit in container
+        "http://127.0.0.1:5000/news/top/8"
+      )
+      let data = response.data
+      setTopNews(data)
+      setNewsData(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
-  // useEffect(() => {
-  //   fetchData()
-  // }, [fetchData])
+  async function fetchAllNews() {
+    try {
+      const response = await axios.get(
+        // limit this to 10 so it can fit in container
+        "http://127.0.0.1:5000/news/all/8"
+      )
+      let data = response.data
+      setAllNews(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
-  // console.log(newsData)
+  useEffect(() => {
+    fetchTopNews()
+    fetchAllNews()
+  }, [])
+
+  console.log(newsData)
   return (
     <div style={{ flex: 1 }}>
       <div
@@ -129,21 +64,68 @@ const NewsSection = () => {
           height: 2,
         }}
       ></div>
-      <p
+      <div
         style={{
-          marginRight: "60%",
-          color: "white",
-          marginTop: "2%",
-          marginLeft: "5%",
-          marginBottom: "1%",
+          display: "flex",
+          flexDirection: "row",
         }}
       >
-        Top News
-      </p>
-      {newsData.slice(0, 8).map(article => {
+        <p
+          style={{
+            marginRight: "5%",
+            color: "white",
+            marginTop: "2%",
+            marginLeft: "5%",
+            marginBottom: "1%",
+          }}
+        >
+          News
+        </p>
+        <button
+          style={{
+            backgroundColor: "transparent",
+            color: "white",
+            fontSize: 12,
+            height: "1%",
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: newsFilter == "top" ? "white" : "transparent",
+            marginTop: "2%",
+            alignSelf: "center",
+          }}
+          onClick={() => {
+            setNewsFilter("top")
+            setNewsData(topNews)
+          }}
+        >
+          Top
+        </button>
+        <button
+          style={{
+            backgroundColor: "transparent",
+            color: "white",
+            fontSize: 12,
+            height: "1%",
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: newsFilter == "latest" ? "white" : "transparent",
+            marginTop: "2%",
+            alignSelf: "center",
+            marginLeft: "2%",
+          }}
+          onClick={() => {
+            setNewsFilter("latest")
+            setNewsData(allNews)
+          }}
+        >
+          Latest
+        </button>
+      </div>
+
+      {newsData.slice(0, 8).map(news => {
         return (
           <>
-            <SingleNewsContainer data={article} />
+            <SingleNewsContainer news={news} />
             <div
               style={{
                 backgroundColor: "rgba(232,236,239,0.2)",
@@ -158,6 +140,7 @@ const NewsSection = () => {
   )
 }
 
+// TODO: put as a helper function
 // function to extract host name from url
 function extractDomain(url) {
   var domain
@@ -179,8 +162,9 @@ function extractDomain(url) {
   return domain
 }
 
-const SingleNewsContainer = ({ data }) => {
-  const link = extractDomain(data.link) // returns host name ie cryptonews.com
+const SingleNewsContainer = ({ news }) => {
+  console.log(news.link)
+  const link = extractDomain(news.link) // returns host name ie cryptonews.com
 
   return (
     <div
@@ -196,9 +180,19 @@ const SingleNewsContainer = ({ data }) => {
       }}
     >
       <div style={{ color: "rgb(152, 169, 188)", fontSize: 12, flex: 2 }}>
-        {data.date}
+        {news.date}
       </div>
-      <div style={{ fontSize: 12, width: "40%", flex: 4 }}>{data.title}</div>
+      <div
+        style={{
+          fontSize: 12,
+          width: "50%",
+          marginLeft: "-10%",
+          marginRight: "2%",
+          flex: 4,
+        }}
+      >
+        {news.title}
+      </div>
       <div style={{ color: "rgb(152, 169, 188)", fontSize: 12, flex: 2 }}>
         {link}
       </div>
@@ -209,15 +203,16 @@ const SingleNewsContainer = ({ data }) => {
           display: "flex",
           justifyContent: "center",
           border:
-            data.sentiment === "Positive"
+            news.sentiment === "Positive"
               ? "1.3px solid #60BC3F"
               : "1.3px solid #DB3E62",
           padding: 5,
           borderRadius: 5,
-          color: data.sentiment === "Positive" ? "#60BC3F" : "#DB3E62",
+          color: news.sentiment === "Positive" ? "#60BC3F" : "#DB3E62",
         }}
       >
-        {data.sentiment}
+        {/* {news.sentiment} */}
+        Negative
       </div>
     </div>
   )

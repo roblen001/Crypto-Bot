@@ -33,7 +33,14 @@ const MiddleGraphsSection = () => {
   return (
     <>
       {/* bar graph for live market section */}
-      <div style={{ flex: 10, display: "flex", flexDirection: "column" }}>
+      <div
+        style={{
+          flex: 10,
+          display: "flex",
+          flexDirection: "column",
+          background: "#3C4C5E",
+        }}
+      >
         {/* top header */}
         <TopHeaderSection
           setSymbol={setSymbol}
@@ -149,7 +156,14 @@ const TopHeaderSection = ({
 // chart section
 const ChartSection = ({ symbol }) => {
   return (
-    <div style={{ flex: 10 }}>
+    <div
+      style={{
+        flex: 10,
+        paddingLeft: "3%",
+        paddingRight: "3%",
+        paddingBottom: "3%",
+      }}
+    >
       <TradingViewWidget
         symbol={symbol}
         autosize
