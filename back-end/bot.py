@@ -69,7 +69,7 @@ order = {
     "side": "SELL",
     "fills": [
         {
-            "price": "4000.00000000",
+            "price": "10.00000000",
             "qty": "1.00000000",
             "commission": "4.00000000",
             "commissionAsset": "USDT"
@@ -88,9 +88,11 @@ cum_market_price = market_price*qty
 fee_percent = 0.075/100
 fee = cum_market_price*fee_percent
 # assumption is that fills['price'] includes fees, but to be safe we do this
+#  I believe this works if were buying based on quantity
 price_with_fee = cum_market_price + fee
 
 if side == 'BUY':
+    # TODO: this should be NAs not ---
     profits = '---'
     profits_percent = '---'
 else:

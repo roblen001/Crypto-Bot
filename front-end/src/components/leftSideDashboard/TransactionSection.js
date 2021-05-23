@@ -95,7 +95,7 @@ const SingleTransactionContainer = ({ transaction }) => {
         display: "flex",
         height: 60,
         alignItems: "center",
-        justifyContent: "space-evenly",
+        paddingLeft: "3%",
       }}
     >
       {/* Symbol icon and name */}
@@ -104,13 +104,23 @@ const SingleTransactionContainer = ({ transaction }) => {
           return item.icon
         }
       })}
-      <div style={{ color: "white" }}>{transaction.symbol}</div>
+      <div
+        style={{
+          color: "white",
+          marginLeft: "2%",
+          width: "16%",
+        }}
+      >
+        {transaction.symbol}
+      </div>
       {/* Price */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          width: "10%",
+          // marginRight: "2%",
         }}
       >
         <div
@@ -121,7 +131,7 @@ const SingleTransactionContainer = ({ transaction }) => {
         >
           {transaction.price_with_fee.toFixed(2)}
         </div>
-        <div style={{ color: "#98A9BC", fontSize: 12 }}>Price</div>
+        <div style={{ color: "#98A9BC", fontSize: 12 }}>price</div>
       </div>
       {/* Quantity */}
       <div
@@ -129,6 +139,8 @@ const SingleTransactionContainer = ({ transaction }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          width: "6%",
+          marginRight: "2%",
         }}
       >
         <div
@@ -147,6 +159,8 @@ const SingleTransactionContainer = ({ transaction }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          width: "25%",
+          marginRight: "2%",
         }}
       >
         <div
@@ -167,6 +181,8 @@ const SingleTransactionContainer = ({ transaction }) => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          width: "21%",
+          marginRight: "2%",
         }}
       >
         {transaction.profits === "---" && (
@@ -182,11 +198,11 @@ const SingleTransactionContainer = ({ transaction }) => {
         {transaction.profits != "---" && (
           <div
             style={{
-              color: "white",
+              color: transaction.profits <= 0 ? "#DB3E62" : "#60BC3F",
               fontSize: 12,
             }}
           >
-            {parseFloat(transaction.profits).toFixed(2)} (
+            {parseFloat(transaction.profits).toFixed(2)}$ (
             {parseFloat(transaction.profits_percent).toFixed(2)}%)
           </div>
         )}

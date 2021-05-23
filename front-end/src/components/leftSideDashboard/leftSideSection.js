@@ -54,7 +54,6 @@ const NewsSection = () => {
     fetchAllNews()
   }, [])
 
-  console.log(newsData)
   return (
     <div style={{ flex: 1 }}>
       <div

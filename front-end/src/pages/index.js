@@ -8,6 +8,7 @@ import Layout from "../components/layout"
 import Seo from "../components/seo"
 import MiddleGraphsSection from "../components/middleDashboard/middleGraphsSection"
 import LeftSideSection from "../components/leftSideDashboard/leftSideSection"
+import RightSideSection from "../components/rightSideDashboard/rightSideSection"
 
 const IndexPage = () => (
   <>
@@ -23,10 +24,7 @@ const IndexPage = () => (
       </div>
       {/* right side of dashboard */}
       <div className="sideColumnWrapper">
-        {/* user inputs section */}
-        <div style={{ flex: 1 }}></div>
-        {/* account information ie Balance and gains section */}
-        <div style={{ flex: 1 }}></div>
+        <RightSideSection />
       </div>
     </div>
   </>

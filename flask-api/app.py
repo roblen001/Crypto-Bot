@@ -8,6 +8,7 @@ import os
 from binance.client import Client
 from binance.enums import *
 import pandas as pd
+# custom functions
 
 test_api = config.TEST_API_KEY
 test_secret = config.TEST_SECRET_KEY
@@ -51,6 +52,47 @@ class News(Resource):
 # determining the root of the resource
 api.add_resource(News,
                  "/news/<string:type>/<int:limit>")
+
+
+class BotStatistics(Resource):
+    # this will calculate all the overall bot statistics
+    # TODO: tie up to SQL database
+    def get(self, type):
+        result = 0
+        df = pd.read_csv("../transaction_history.csv")
+        if type == 'netprofits':
+            for symbol in df['symbol'].unique():
+                # finding the first buying price ever of the symbol
+                df_funnel = df.loc[(df['symbol'] == symbol)
+                                   & (df['side'] == 'BUY')]
+                first_buy = df_funnel.head(1)['price_with_fee']
+                current_market_price = 1
+                potential_profits = current_market_price - first_buy
+            totalProfit = 2
+            sellData = df.loc[df['side'] == 'SELL']
+            toNumeric = pd.to_numeric(
+                sellData['profits'])
+            botProfit = toNumeric.sum()
+            result = toNumeric.sum()
+        elif type == 'positivetrades':
+            sellData = df.loc[df['side'] == 'SELL']
+            totalCountSellTransactions = len(sellData['profits'])
+            toNumeric = pd.to_numeric(
+                sellData['profits'])
+            countPositiveTrades = len(toNumeric.loc[toNumeric >= 0])
+            result = countPositiveTrades/totalCountSellTransactions * 100
+        elif type == 'comparestrategy':
+            sellData = df.loc[df['side'] == 'SELL']
+            toNumeric = pd.to_numeric(
+                sellData['profits'])
+            result = toNumeric.sum()
+
+        return result
+
+
+# determining the root of the resource
+api.add_resource(BotStatistics,
+                 "/botstatistics/<string:type>")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -211,4 +211,4 @@ def newsscraper(type):
     return print('scraping up to date')
 
 
-newsscraper('latest')
+newsscraper('top')
