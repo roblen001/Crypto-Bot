@@ -1,4 +1,4 @@
-﻿id,symbol,market_price ,qty,timestamp,side,cum_market_price,fee,fee_percent,price_with_fee,profits,profits_percent
+﻿id,symbol,market_price,qty,timestamp,side,cum_market_price,fee,fee_percent,price_with_fee,profits,profits_percent
 6gCrw2kRUAF9CvJDGP16IP,ETHUSDT,146.8500,4.00000,1621178768434,BUY,587.4000,0.44055,0.075,587.84055,---,---
 6gCrw2kRUAF9CvJDGP12IP,LTCUSDT,100.0,1.0,1621185525503,BUY,100.0,0.075,0.00075,100.0,---,---
 2gCrw2kRUAF9CvJDGP16IP,LTCUSDT,185.58,1.0,1621194273710,SELL,185.58,0.075,0.00075,200,100,10

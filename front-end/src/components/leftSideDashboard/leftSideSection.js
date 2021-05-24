@@ -162,7 +162,6 @@ function extractDomain(url) {
 }
 
 const SingleNewsContainer = ({ news }) => {
-  console.log(news.link)
   const link = extractDomain(news.link) // returns host name ie cryptonews.com
 
   return (
@@ -192,9 +191,13 @@ const SingleNewsContainer = ({ news }) => {
       >
         {news.title}
       </div>
-      <div style={{ color: "rgb(152, 169, 188)", fontSize: 12, flex: 2 }}>
+      <a
+        href={news.link}
+        target="_blank"
+        style={{ color: "rgb(152, 169, 188)", fontSize: 12, flex: 2 }}
+      >
         {link}
-      </div>
+      </a>
       <div
         style={{
           flex: 1,

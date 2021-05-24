@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import * as Icon from "react-cryptocoins"
 import Binance from "binance-api-node"
 import axios from "axios"
+import moment from "moment"
 
 // svgs
 import ArrowGain from "../../images/ArrowGain.svg"
@@ -77,6 +78,9 @@ const RightSideSection = () => {
   const [netProfits, setNetProfits] = useState(0)
   const [tradesWinRate, setTradesWinRate] = useState(0)
   const [strategyCompare, setStrategyCompare] = useState(0)
+  const [botFeederHistoricalData, setBotFeederHistoricalData] = useState([])
+  const [totalFed, setTotalFed] = useState(0)
+  const [inputData, setInputData] = useState(null)
 
   function handleSelectChange(event) {
     setSymbol(event.target.value)
@@ -93,6 +97,15 @@ const RightSideSection = () => {
       const response3 = await axios.get(
         "http://127.0.0.1:5000/botstatistics/comparestrategy"
       )
+
+      const response4 = await axios.get(
+        "http://127.0.0.1:5000/botfeeder/feedingHistoryData/8"
+      )
+
+      const response5 = await axios.get(
+        "http://127.0.0.1:5000/botfeeder/totalFed/0"
+      )
+
       let stat1 = response1.data
       setNetProfits(stat1.toFixed(2))
 
@@ -101,6 +114,12 @@ const RightSideSection = () => {
 
       let stat3 = response3.data
       setStrategyCompare(stat3.toFixed(2))
+
+      let data4 = response4.data
+      setBotFeederHistoricalData(data4)
+
+      let data5 = response5.data
+      setTotalFed(data5)
     } catch (error) {
       console.error(error)
     }
@@ -166,8 +185,8 @@ const RightSideSection = () => {
                 marginLeft: "2%",
               }}
             >
-              <div>Total Fed:</div>
-              <div>100$</div>
+              <div style={{ marginRight: "2%" }}>Total Fed:</div>
+              <div>{totalFed}$</div>
             </div>
             <div style={{ color: "white", fontSize: 12, marginLeft: "2%" }}>
               *currency is in USD
@@ -187,8 +206,33 @@ const RightSideSection = () => {
                 marginLeft: "2%",
                 marginRight: "2%",
               }}
+              name="amount"
+              type="number"
+              value={inputData}
+              onChange={e => {
+                setInputData(e.target.value)
+              }}
             />
-            <button>Feed</button>
+            <button
+              onClick={() => {
+                const currentDate = new Date()
+                const timestamp = currentDate.getTime()
+                // POST request using axios
+                const feed = { amount: inputData, timestamp: timestamp }
+
+                axios
+                  .post("http://127.0.0.1:5000/botFeederAddData", feed)
+                  .then(res => {
+                    console.log(res.data)
+                  })
+
+                // axios
+                //   .get("http://127.0.0.1:5000/botfeeder/feedingHistoryData/8")
+                //   .then(response => setBotFeederHistoricalData(response.data))
+              }}
+            >
+              Feed
+            </button>
           </div>
         </div>
         <div
@@ -198,11 +242,11 @@ const RightSideSection = () => {
             height: 2,
           }}
         ></div>
-        {mockData2.slice(0, 8).map(transaction => {
+        {botFeederHistoricalData.map(transaction => {
           return (
             <>
               <SingleFeedingHistoryContainer
-                date={transaction["date"]}
+                date={transaction["timestamp"]}
                 amount={transaction["amount"]}
               />
               <div
@@ -275,7 +319,7 @@ const RightSideSection = () => {
                 width: "30%",
               }}
             >
-              Buy
+              Start
             </button>
             <button
               style={{
@@ -284,7 +328,7 @@ const RightSideSection = () => {
                 width: "30%",
               }}
             >
-              Sell
+              Stop
             </button>
           </div>
         </div>
@@ -525,7 +569,7 @@ const SingleFeedingHistoryContainer = ({ amount, date }) => {
             fontSize: 12,
           }}
         >
-          {date}
+          {moment.unix(date / 1000).format("DD MMM YYYY hh:mm a")}
         </div>
         <div style={{ color: "#98A9BC", fontSize: 12, marginTop: -4 }}>
           date and time
