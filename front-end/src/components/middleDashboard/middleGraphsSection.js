@@ -5,6 +5,7 @@ import Binance from "binance-api-node"
 import "bootstrap/dist/css/bootstrap.min.css"
 
 import "./middleGraphsSection.css"
+import MenuCard from "./MenuCard"
 
 const client = Binance()
 
@@ -56,7 +57,9 @@ const MiddleGraphsSection = () => {
         <ChartSection symbol={symbol} />
       </div>
       {/* bot forecast graph section */}
-      <div style={{ flex: 8 }}></div>
+      <div style={{ flex: 8 }}>
+        <MenuCard />
+      </div>
     </>
   )
 }
@@ -168,7 +171,7 @@ const ChartSection = ({ symbol }) => {
         symbol={symbol}
         autosize
         theme="dark"
-        studies={["MACD@tv-basicstudies", "MOM@tv-basicstudies"]}
+        studies={["MACD@tv-basicstudies"]}
       />
     </div>
   )

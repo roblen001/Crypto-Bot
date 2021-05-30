@@ -10,10 +10,6 @@ import os
 from binance.client import Client
 from binance.enums import *
 
-# TODO: once a transaction is succesfully completed we want to make an api call
-#  - get future account transaction history list
-#  - the assumption is that it this history will be completed when the transaction is succesful (function get_all_orders)
-
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
 #  setting up the test network

@@ -16,6 +16,7 @@ import nltk
 # -This will run forever if the csv files are empty: wont be to go up to the most recent article
 # -Get selenium to not open up a webdriver ui
 # -Get selenium to stop when it is done (the terminal keeps running for no reason)
+# -Opens up two different webdrivers for some reason
 
 
 def append_list_as_row(file_name, list_of_elem):
@@ -28,6 +29,7 @@ def append_list_as_row(file_name, list_of_elem):
 
 
 def newsscraper(type):
+    print('scraper online:', type)
     # will scrape the top or latest news and store values in different datasets (top or latest)
     #  FOR TOP NEWS ====================================================================
     if type == 'top':
@@ -75,7 +77,7 @@ def newsscraper(type):
                 for date in element.find_all("span", {"class": "datetime flex middle-xs"}):
                     #  if date is h then it is the current date
                     if "h" in date.getText():
-                        timestamp = datetime.today().strftime('%m-%d')
+                        timestamp = datetime.today().strftime('%d-%m')
                         dateList.append(timestamp)
                     else:
                         partitioned_date = date.getText().strip().partition('.')
@@ -108,13 +110,13 @@ def newsscraper(type):
 
             # check if title has already been scraped if not then continue to scrape
             for idx in range(len(df['title'])):
-                print(idx)
                 if df['title'][idx] == df_firstn['title'][0]:
                     uptodate = True
                     new_df = df.head(idx)
                     reversed_df = new_df.iloc[::-1]
                     reversed_df.to_csv(
                         '../topNews.csv', mode='a', header=False, index=False)
+                    driver.quit()
 
     # FOR LATEST NEWS ============================================
     elif type == 'latest':
@@ -167,7 +169,7 @@ def newsscraper(type):
                 for date in element.find_all("span", {"class": "datetime flex middle-xs"}):
                     #  if date is h then it is the current date
                     if "h" in date.getText():
-                        timestamp = datetime.today().strftime('%m-%d')
+                        timestamp = datetime.today().strftime('%d-%m')
                         dateList.append(timestamp)
                     else:
                         partitioned_date = date.getText().strip().partition('.')
@@ -200,15 +202,12 @@ def newsscraper(type):
 
             # check if title has already been scraped if not then continue to scrape
             for idx in range(len(df['title'])):
-                print(idx)
                 if df['title'][idx] == df_firstn['title'][0]:
                     uptodate = True
                     new_df = df.head(idx)
                     reversed_df = new_df.iloc[::-1]
                     reversed_df.to_csv(
                         '../allNews.csv', mode='a', header=False, index=False)
+                    driver.quit()
 
     return print('scraping up to date')
-
-
-newsscraper('top')

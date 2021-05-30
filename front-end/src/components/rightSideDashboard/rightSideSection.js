@@ -114,7 +114,7 @@ const RightSideSection = () => {
 
       let stat3 = response3.data
       setStrategyCompare(stat3.toFixed(2))
-
+      // TODO: -trigger this on feed button press
       let data4 = response4.data
       setBotFeederHistoricalData(data4)
 
@@ -225,7 +225,7 @@ const RightSideSection = () => {
                   .then(res => {
                     console.log(res.data)
                   })
-
+                setInputData(null)
                 // axios
                 //   .get("http://127.0.0.1:5000/botfeeder/feedingHistoryData/8")
                 //   .then(response => setBotFeederHistoricalData(response.data))

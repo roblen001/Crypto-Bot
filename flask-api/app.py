@@ -10,8 +10,14 @@ from binance.enums import *
 import pandas as pd
 import requests
 from csv import DictWriter
+import time
+import websocket
 from flask_cors import CORS
+import threading
+
 # custom functions
+from newsscraper import newsscraper
+from bot import bot
 
 test_api = config.TEST_API_KEY
 test_secret = config.TEST_SECRET_KEY
@@ -23,6 +29,32 @@ app = Flask(__name__)
 api = Api(app)
 # check options for this for security reasons
 CORS(app)
+
+
+# background tasks
+# top news scraper runs once a day
+def run_top_news_scraper():
+    while True:
+        newsscraper('top')
+        time.sleep(86400)
+
+
+# top news scraper runs once every 30 mins
+def run_all_news_scraper():
+    while True:
+        newsscraper('latest')
+        time.sleep(1800)
+
+
+def trading_bot():
+    bot()
+
+
+# running background tasks
+
+threading.Thread(target=run_top_news_scraper).start()
+threading.Thread(target=run_all_news_scraper).start()
+threading.Thread(target=trading_bot).start()
 
 
 class All_transaction_history(Resource):
