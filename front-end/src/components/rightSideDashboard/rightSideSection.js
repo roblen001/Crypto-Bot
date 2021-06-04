@@ -89,21 +89,21 @@ const RightSideSection = () => {
   async function fetchData() {
     try {
       const response1 = await axios.get(
-        "http://127.0.0.1:5000/botstatistics/netprofits"
+        "http://192.168.2.117:5000/botstatistics/netprofits"
       )
       const response2 = await axios.get(
-        "http://127.0.0.1:5000/botstatistics/positivetrades"
+        "http://192.168.2.117:5000/botstatistics/positivetrades"
       )
       const response3 = await axios.get(
-        "http://127.0.0.1:5000/botstatistics/comparestrategy"
+        "http://192.168.2.117:5000/botstatistics/comparestrategy"
       )
 
       const response4 = await axios.get(
-        "http://127.0.0.1:5000/botfeeder/feedingHistoryData/8"
+        "http://192.168.2.117:5000/botfeeder/feedingHistoryData/8"
       )
 
       const response5 = await axios.get(
-        "http://127.0.0.1:5000/botfeeder/totalFed/0"
+        "http://192.168.2.117:5000/botfeeder/totalFed/0"
       )
 
       let stat1 = response1.data
@@ -113,7 +113,7 @@ const RightSideSection = () => {
       setTradesWinRate(stat2.toFixed(2))
 
       let stat3 = response3.data
-      setStrategyCompare(stat3.toFixed(2))
+      setStrategyCompare(parseFloat(stat3).toFixed(2))
       // TODO: -trigger this on feed button press
       let data4 = response4.data
       setBotFeederHistoricalData(data4)

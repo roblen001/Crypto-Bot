@@ -128,7 +128,7 @@ class BotStatistics(Resource):
             sellData = df.loc[df['side'] == 'SELL']
             toNumeric = pd.to_numeric(
                 sellData['profits'])
-            result = toNumeric.sum()
+            result = str(toNumeric.sum())
 
         return result
 
@@ -182,4 +182,4 @@ api.add_resource(BotFeederAddData,
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

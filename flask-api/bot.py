@@ -12,15 +12,15 @@ import matplotlib.pyplot as plt
 from getData import get_data_onStart
 import csv
 from tradingview_ta import TA_Handler, Interval, Exchange
-
+import time
 
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
 #  setting up the test network
-test_api = config.TEST_API_KEY
-test_secret = config.TEST_SECRET_KEY
+test_api = config.API_KEY
+test_secret = config.API_SECRET
 client = Client(test_api, test_secret)
-client.API_URL = 'https://testnet.binance.vision/api'
+# client.API_URL = 'https://testnet.binance.vision/api'
 
 TRADE_SYMBOL = 'ETHUSDT'
 # TODO: create a function to be the max possible amount
@@ -61,6 +61,28 @@ def append_list_as_row(file_name, list_of_elem):
 def order(side, quantity, symbol, order_type='MARKET'):
     try:
         print("sending order")
+        # for testing
+        order = {
+            "symbol": symbol,
+            "orderId": '28',
+            "clientOrderId": "6gCrw2kRUAF9CvJDGP16IP",
+            "transactTime": str(int(round(time.time() * 1000))),
+            "price": "0.00000000",
+            "origQty": "10.00000000",
+            "executedQty": "10.00000000",
+            "status": "FILLED",
+            "timeInForce": "GTC",
+            "type": "MARKET",
+            "side": side,
+            "fills": [
+                {
+                    "price": "4000.00000000",
+                    "qty": "1.00000000",
+                    "commission": "4.00000000",
+                    "commissionAsset": "USDT"
+                },
+            ]
+        }
         # order = client.create_order(
         #     symbol=symbol, side=side, type=order_type, quantity=quantity)
 
@@ -74,7 +96,7 @@ def order(side, quantity, symbol, order_type='MARKET'):
         cum_market_price = market_price*qty
         #  might need to be adjusted later
         fee_percent = 0.075
-        fee = cum_market_price*fee_percent
+        fee = cum_market_price*(fee_percent/100)
         # assumption is that fills['price'] includes fees, but to be safe we do this
         #  I believe this works if were buying based on quantity
         price_with_fee = cum_market_price + fee
@@ -134,16 +156,15 @@ def on_message(ws, message):
             symbol="ETHUSDT",
             screener="crypto",
             exchange="BINANCE",
-            interval=Interval.INTERVAL_1_HOUR
+            interval=Interval.INTERVAL_1_DAY
         )
         indicator = eth.get_analysis().summary['RECOMMENDATION']
-        print(eth.get_analysis().summary)
         if indicator == 'SELL' or indicator == 'STRONG_SELL':
             # TODO: -this will be flawed when I need to switch the bot currency
             df = pd.read_csv("../transaction_history.csv")
             limited_data = df.tail(10).iloc[::-1]
             # not in position need to sell
-            if limited_data[-1]['side'] == "BUY":
+            if limited_data['side'].iloc[0] == "BUY":
                 # put binance sell logic here
                 order_succeeded = order(
                     'SELL', TRADE_QUANTITY, TRADE_SYMBOL)
@@ -151,8 +172,11 @@ def on_message(ws, message):
                     send_mail('The bot has sold.')
 
         if indicator == 'BUY' or indicator == 'STRONG_BUY':
-            if limited_data[-1]['side'] == "SELL":
-                print('in')
+            df = pd.read_csv("../transaction_history.csv")
+            # TODO: -this will be flawed when I need to switch the bot currency
+            df = pd.read_csv("../transaction_history.csv")
+            limited_data = df.tail(10).iloc[::-1]
+            if limited_data['side'].iloc[0] == "SELL":
                 # put binance buy order logic here
                 order_succeeded = order(
                     'BUY', TRADE_QUANTITY, TRADE_SYMBOL)

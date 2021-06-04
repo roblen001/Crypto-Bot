@@ -35,7 +35,7 @@ def newsscraper(type):
     if type == 'top':
         URL = 'https://cryptonews.net/en/news/top/'
 
-        driver = webdriver.Chrome('C:\webdrivers/chromedriver')
+        driver = webdriver.Chrome('/usr/bin/chromedriver')
         driver.get(URL)
 
         time.sleep(3)
@@ -122,7 +122,7 @@ def newsscraper(type):
     elif type == 'latest':
         URL = 'https://cryptonews.net/en/'
 
-        driver = webdriver.Chrome('C:\webdrivers/chromedriver')
+        driver = webdriver.Chrome('/usr/bin/chromedriver')
         driver.get(URL)
 
         time.sleep(3)
