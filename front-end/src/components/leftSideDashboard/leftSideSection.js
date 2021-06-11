@@ -29,6 +29,8 @@ const NewsSection = () => {
         "http://192.168.2.117:5000/news/top/8"
       )
       let data = response.data
+      console.log("top")
+      console.log(typeof data)
       setTopNews(data)
       setNewsData(data)
     } catch (error) {
@@ -42,7 +44,9 @@ const NewsSection = () => {
         // limit this to 10 so it can fit in container
         "http://192.168.2.117:5000/news/all/8"
       )
+
       let data = response.data
+      console.log(typeof data)
       setAllNews(data)
     } catch (error) {
       console.error(error)
@@ -120,7 +124,6 @@ const NewsSection = () => {
           Latest
         </button>
       </div>
-
       {newsData.slice(0, 8).map(news => {
         return (
           <>

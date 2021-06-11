@@ -7,6 +7,7 @@ import moment from "moment"
 // svgs
 import ArrowGain from "../../images/ArrowGain.svg"
 import ArrowLoss from "../../images/ArrowLoss.svg"
+import BNB from "../../images/binance-coin-logo-svg-vector.svg"
 
 // TODO: -only looks for values of USDT
 //       -bot will only be able to trade from UDST (might need to be fixed)
@@ -25,6 +26,11 @@ const cryptoIcons = [
   { symbol: "XRP", icon: <Icon.Xrp color="white" /> },
   { symbol: "BTC", icon: <Icon.Btc color="white" /> },
   { symbol: "USDT", icon: <Icon.Usdt color="white" /> },
+  { symbol: "ADA", icon: <Icon.Ada color="white" /> },
+  {
+    symbol: "BNB",
+    icon: <BNB style={{ height: 28, width: 28 }} color="white" />,
+  },
 ]
 
 const mockData2 = [
@@ -81,6 +87,7 @@ const RightSideSection = () => {
   const [botFeederHistoricalData, setBotFeederHistoricalData] = useState([])
   const [totalFed, setTotalFed] = useState(0)
   const [inputData, setInputData] = useState(null)
+  const [balance, setBalance] = useState([])
 
   function handleSelectChange(event) {
     setSymbol(event.target.value)
@@ -106,6 +113,8 @@ const RightSideSection = () => {
         "http://192.168.2.117:5000/botfeeder/totalFed/0"
       )
 
+      const response6 = await axios.get("http://192.168.2.117:5000/getBalance")
+
       let stat1 = response1.data
       setNetProfits(stat1.toFixed(2))
 
@@ -120,6 +129,9 @@ const RightSideSection = () => {
 
       let data5 = response5.data
       setTotalFed(data5)
+
+      let data6 = response6.data
+      setBalance(data6)
     } catch (error) {
       console.error(error)
     }
@@ -221,7 +233,7 @@ const RightSideSection = () => {
                 const feed = { amount: inputData, timestamp: timestamp }
 
                 axios
-                  .post("http://127.0.0.1:5000/botFeederAddData", feed)
+                  .post("http://192.168.2.117:5000/botFeederAddData", feed)
                   .then(res => {
                     console.log(res.data)
                   })
@@ -395,7 +407,7 @@ const RightSideSection = () => {
         </div>
         {/* Account Balance Section */}
         <div style={{ color: "white", marginTop: "5%" }}>Account Balance</div>
-        {mockData.balances.map(asset => {
+        {balance.map(asset => {
           return (
             <>
               <SingleAccountBalance key={asset.asset} asset={asset} />
