@@ -31,6 +31,7 @@ const NewsSection = () => {
       let data = response.data
       console.log("top")
       console.log(typeof data)
+      print(JSON.parse(data))
       setTopNews(data)
       setNewsData(data)
     } catch (error) {
