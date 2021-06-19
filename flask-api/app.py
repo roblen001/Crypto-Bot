@@ -109,7 +109,7 @@ class BotStatistics(Resource):
                 print(asset_ticker)
                 if symbol['asset'] != 'USDT':
                     response = requests.get(
-                        "https://api.binance.com/api/v1/ticker/price?symbol=" + asset_ticker)
+                        "https://api.binance.com/api/v1/ticker/price?symbol=" + "SNTUSDT")
                     print(response.json()['price'])
                     symbol_marketPrice = response.json()['price']
                     total_assets_value += float(symbol_marketPrice) * \
