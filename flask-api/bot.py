@@ -156,7 +156,7 @@ def on_message(ws, message):
     if is_candle_closed:
         response = requests.get(
             "https://api.taapi.io/rsi?secret=" + taapi + "&exchange=binance&symbol=ETH/USDT&interval=1h")
-        rsi = response.json()
+        rsi = response.json()['value']
         print(rsi)
         if rsi > 75:
             # TODO: -this will be flawed when I need to switch the bot currency
