@@ -31,11 +31,7 @@ const NewsSection = () => {
       // TODO: THIS IS A TEMP FIX
       let data = response.data
       console.log("top")
-      console.log(data)
-      data.replace("[", "{")
-      data.replace("]", "}")
-      console.log(data)
-      console.log(JSON.parse(data))
+      console.log(typeof data)
       setTopNews(data)
       setNewsData(data)
     } catch (error) {
