@@ -145,7 +145,6 @@ def on_close(ws):
 
 
 def on_message(ws, message):
-    print('received message')
     json_message = json.loads(message)
 
     candle = json_message['k']
@@ -154,10 +153,9 @@ def on_message(ws, message):
     close = candle['c']
 
     if is_candle_closed:
-        print('candle is closed')
         response = requests.get(
             "https://api.taapi.io/rsi?secret=" + taapi + "&exchange=binance&symbol=ETH/USDT&interval=1h")
-
+        print(response)
         rsi = response.data
         print(rsi)
         if rsi > 75:
