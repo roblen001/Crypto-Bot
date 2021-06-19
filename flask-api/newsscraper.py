@@ -48,7 +48,7 @@ def newsscraper(type):
 
         df = pd.read_csv('../topNews.csv')
         df_firstn = df.tail(1)
-        print(df_firstn)
+        print(df_firstn['title'])
         uptodate = False
         while uptodate == False:
             while i < 1:
