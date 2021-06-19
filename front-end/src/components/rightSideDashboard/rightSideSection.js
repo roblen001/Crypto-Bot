@@ -113,7 +113,7 @@ const RightSideSection = () => {
         "http://192.168.2.117:5000/botfeeder/totalFed/0"
       )
 
-      const response6 = await axios.get("http://192.168.2.117:5000/getBalance")
+      // const response6 = await axios.get("http://192.168.2.117:5000/getBalance")
 
       let stat1 = response1.data
       setNetProfits(stat1.toFixed(2))
@@ -130,8 +130,8 @@ const RightSideSection = () => {
       let data5 = response5.data
       setTotalFed(data5)
 
-      let data6 = response6.data
-      setBalance(data6)
+      // let data6 = response6.data
+      // setBalance(data6)
     } catch (error) {
       console.error(error)
     }

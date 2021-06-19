@@ -28,7 +28,6 @@ const NewsSection = () => {
         // limit this to 10 so it can fit in container
         "http://192.168.2.117:5000/news/top/8"
       )
-      // TODO: THIS IS A TEMP FIX
       let data = response.data
       console.log("top")
       console.log(typeof data)
