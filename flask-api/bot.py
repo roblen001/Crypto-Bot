@@ -17,9 +17,11 @@ import time
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
 #  setting up the test network
-test_api = config.API_KEY
-test_secret = config.API_SECRET
-client = Client(test_api, test_secret)
+api = config.API_KEY
+secret = config.API_SECRET
+client = Client(api, secret)
+
+taapi = config.TAAPI
 # client.API_URL = 'https://testnet.binance.vision/api'
 
 TRADE_SYMBOL = 'ETHUSDT'
@@ -152,14 +154,12 @@ def on_message(ws, message):
     close = candle['c']
 
     if is_candle_closed:
-        eth = TA_Handler(
-            symbol="ETHUSDT",
-            screener="crypto",
-            exchange="BINANCE",
-            interval=Interval.INTERVAL_1_DAY
-        )
-        indicator = eth.get_analysis().summary['RECOMMENDATION']
-        if indicator == 'SELL' or indicator == 'STRONG_SELL':
+        response = requests.get(
+            "https://api.taapi.io/rsi?secret=" + taapi + "&exchange=binance&symbol=ETH/USDT&interval=1h")
+
+        rsi = response.data
+        print(rsi)
+        if rsi > 75:
             # TODO: -this will be flawed when I need to switch the bot currency
             df = pd.read_csv("../transaction_history.csv")
             limited_data = df.tail(10).iloc[::-1]
@@ -171,7 +171,7 @@ def on_message(ws, message):
                 if order_succeeded:
                     send_mail('The bot has sold.')
 
-        if indicator == 'BUY' or indicator == 'STRONG_BUY':
+        if rsi < 35:
             df = pd.read_csv("../transaction_history.csv")
             # TODO: -this will be flawed when I need to switch the bot currency
             df = pd.read_csv("../transaction_history.csv")

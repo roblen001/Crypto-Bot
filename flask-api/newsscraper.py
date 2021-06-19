@@ -46,7 +46,8 @@ def newsscraper(type):
         #  change the i value to get more data
         #  TODO: this loop will run till it reaches the point to which it already has in the data base
 
-        df_firstn = pd.read_csv('../topNews.csv', nrows=1)
+        df = pd.read_csv('../topNews.csv')
+        df_firstn = df.tail(1)
         uptodate = False
         while uptodate == False:
             while i < 1:
@@ -136,7 +137,8 @@ def newsscraper(type):
         #     reader = csv.reader(f)
         #     first_row = next(reader)
         #     print(first_row)
-        df_firstn = pd.read_csv('../allNews.csv', nrows=1)
+        df = pd.read_csv('../allNews.csv')
+        df_firstn = df.tail(1)
 
         #  TODO: this loop will run till it reaches the point to which it already has in the data base
         uptodate = False

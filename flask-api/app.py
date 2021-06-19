@@ -19,10 +19,10 @@ import threading
 from newsscraper import newsscraper
 from bot import bot
 
-test_api = config.TEST_API_KEY
-test_secret = config.TEST_SECRET_KEY
-client = Client(test_api, test_secret)
-client.API_URL = 'https://testnet.binance.vision/api'
+api = config.API_KEY
+secret = config.API_SECRET
+client = Client(api, secret)
+# client.API_URL = 'https://testnet.binance.vision/api'
 
 # env\Scripts\activate
 app = Flask(__name__)
