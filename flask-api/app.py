@@ -107,7 +107,7 @@ class BotStatistics(Resource):
                 # print(symbol['free'])
                 # market_prices = client.get_symbol_ticker().
                 print(asset_ticker)
-                if symbol['asset'] != 'USDT' or asset_ticker != 'SNTUSDT':
+                if symbol['asset'] != 'USDT' and asset_ticker != 'SNTUSDT':
                     response = requests.get(
                         "https://api.binance.com/api/v1/ticker/price?symbol=" + asset_ticker)
                     print(response.json()['price'])
