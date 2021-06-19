@@ -32,8 +32,9 @@ const NewsSection = () => {
       let data = response.data
       console.log("top")
       console.log(data)
-      data.replace("[", "")
-      data.replace("]", "")
+      data.replace("[", "{")
+      data.replace("]", "}")
+      console.log(data)
       console.log(JSON.parse(data))
       setTopNews(data)
       setNewsData(data)
