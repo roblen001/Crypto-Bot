@@ -13,6 +13,7 @@ from getData import get_data_onStart
 import csv
 from tradingview_ta import TA_Handler, Interval, Exchange
 import time
+import requests
 
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
