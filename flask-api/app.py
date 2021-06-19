@@ -178,5 +178,20 @@ api.add_resource(BotFeederAddData,
                  "/botFeederAddData")
 
 
+class getBalance(Resource):
+    # when bot is fed data is added to the database
+    def get(self):
+        lst = []
+        client.get_account()['balances']
+        for symbol in client.get_account()['balances']:
+            if symbol['free'] != '0.00000000' and symbol['free'] != '0.00':
+                lst.append(symbol)
+        return lst
+
+        # determining the root of the resource
+api.add_resource(getBalance,
+                 "/getBalance")
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
