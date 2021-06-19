@@ -36,14 +36,14 @@ CORS(app)
 def run_top_news_scraper():
     while True:
         newsscraper('top')
-        time.sleep(86400)
+        time.sleep(1800)
 
 
 # top news scraper runs once every 30 mins
 def run_all_news_scraper():
     while True:
         newsscraper('latest')
-        time.sleep(1800)
+        time.sleep(900)
 
 
 def trading_bot():

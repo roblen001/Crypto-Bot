@@ -48,6 +48,7 @@ def newsscraper(type):
 
         df = pd.read_csv('../topNews.csv')
         df_firstn = df.tail(1)
+        print(df_firstn)
         uptodate = False
         while uptodate == False:
             while i < 1:
@@ -111,7 +112,7 @@ def newsscraper(type):
 
             # check if title has already been scraped if not then continue to scrape
             for idx in range(len(df['title'])):
-                if df['title'][idx] == df_firstn['title'][0]:
+                if df['title'][idx] == df_firstn['title']:
                     uptodate = True
                     new_df = df.head(idx)
                     reversed_df = new_df.iloc[::-1]
@@ -204,7 +205,7 @@ def newsscraper(type):
 
             # check if title has already been scraped if not then continue to scrape
             for idx in range(len(df['title'])):
-                if df['title'][idx] == df_firstn['title'][0]:
+                if df['title'][idx] == df_firstn['title']:
                     uptodate = True
                     new_df = df.head(idx)
                     reversed_df = new_df.iloc[::-1]
