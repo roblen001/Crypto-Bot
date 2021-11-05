@@ -1,0 +1,3 @@
+"0","allNews$date <- parse_date_time(allNews$date, orders = ""dmyHM"")"
+"2"," 112 failed to parse."
+"0","head(allNews, 10)"

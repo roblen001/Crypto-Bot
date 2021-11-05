@@ -1,0 +1,934 @@
+---
+title: "News_Data_Processing"
+author: "Roberto Lentini"
+date: "19/10/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(scales)
+library(patchwork) # To display 2 charts together
+library(hrbrthemes)
+```
+```{r}
+library(readr)
+allNews <- read_csv("E:/allNews.csv")
+colnames(allNews) <- c("title", "link", "date", "article")
+head(allNews, 200)
+
+missingNews <- read_csv("E:/MissingNews.csv")
+head(missingNews, 10)
+```
+```{r}
+# eth price
+ethprice <- read_csv("E:/ethprice_data.csv")
+
+ethprice$date <- as.Date(ethprice$date)
+
+# plot
+ethprice %>% 
+  ggplot( aes(x=date, y=ethprice$price)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "eth price")
+
+```
+```{r}
+# marketcap
+marketcap <- read_csv("E:/MarketCap.csv")
+marketcap
+marketcap <- marketcap %>% select('Date(UTC)', 'MarketCap')
+colnames(marketcap) <- c("date", "marketcap")
+
+marketcap$date <- parse_date_time(marketcap$date, orders = "mdy")
+marketcap
+# plot
+marketcap %>%
+  ggplot( aes(x=date, y=marketcap)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "marketcap")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 100
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- marketcap
+other_y_axis_name <- "marketcap"
+other_y_axis_variable <- marketcap$marketcap
+
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) + 
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data cleaning
+allNews <- allNews[-(1:187),]
+
+# removing rows if article data is "Broken Link" or empty
+allNews <- allNews %>% filter(is.na(article) == FALSE | article != "Broken Link")
+missingNews <- missingNews %>% filter(is.na(article) == FALSE | article != "Broken Link")
+
+```
+```{r}
+# creating the full news dataset with the missing months
+allNews <- left_join(allNews, missingNews, 'title') %>%
+  mutate(link = coalesce(link.y, link.x),
+         date = coalesce(date.y, date.x),
+         article = coalesce(article.y, article.x)) %>%
+  select(-contains('.'))
+```
+```{r}
+allNews$date <- parse_date_time(allNews$date, orders = "dmyHM")
+head(allNews, 10)
+# creating and exporting the data that will be used for the sentiment analysis model
+news_data <- allNews
+news_data$date <- format(news_data$date, format="%Y-%m-%d")
+head(news_data, 10)
+nrow(news_data)
+# write.csv(news_data,"E:/news_data.csv", row.names = FALSE)
+```
+```{r}
+# check for missing dates
+dates <- data.frame(as.Date(as.character(allNews$date)))
+colnames(dates) <- "date"
+# dates <- unique(dates)
+dates$date <- rev(dates$date)
+unique(dates)
+startDate <- as.Date("2017-08-18")
+endDate <- as.Date("2021-10-11")
+FullSeq <- seq.Date(from = startDate, to = endDate, by = 1)
+Missing <- FullSeq[!FullSeq %in% dates$date]
+Missing
+```
+```{r}
+allNews %>% distinct(title, .keep_all = TRUE)
+dates <- data.frame(as.Date(as.character(allNews$date)))
+dates$date <- rev(dates$date)
+dates <- format(dates, "%Y-%m")
+tail(dates)
+```
+```{r}
+article_count <- as.data.frame(table(dates))
+head(article_count)
+ggplot(article_count, aes(x = dates, y = Freq)) +
+  geom_bar(fill = "#0073C2FF", stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(y= "# articles")
+```
+```{r}
+# twitter volume data
+tweetData <- read_csv("E:/TweetVolume.csv")
+tail(tweetData)
+plot(tweetData, type = "l")
+
+tweetData$date <- as.Date(tweetData$date)
+tweetData$tweet_count <- as.numeric(tweetData$tweet_count)
+
+# impute the missing data and export for analysis
+# plot
+tweetData %>% 
+  ggplot( aes(x=date, y=tweet_count)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "tweet volume")
+
+
+ggplot(tweetData, aes(x = date, y = tweet_count)) +
+  geom_bar(fill = "#0073C2FF", stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(y= "tweet volume")
+```
+```{r}
+library(imputeTS)
+tweetData %>% filter(is.na(tweet_count))
+imp <- na_kalman(tweetData$tweet_count)
+ggplot_na_imputations(tweetData$tweet_count, imp)
+
+```
+
+```{r}
+# data
+data_set <- read_csv("E:/Transactions.csv")
+data_set
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "transactions")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=transactions)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "transactions")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 500
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "transactions"
+other_y_axis_variable <- data_set$transactions
+
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) + 
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/ECR20_transfers.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'No. of ERC20 Token Transfers')
+colnames(data_set) <- c("date", "ecr20_transfers")
+
+data_set$date <- parse_date_time(data_set$date, orders = "ymd")
+data_set
+# write.csv(data_set,"E:/erc20transfers_data.csv", row.names = FALSE)
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=ecr20_transfers)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "ecr20 transfers")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 500
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "ecr20 transfers"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$ecr20_transfers
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+
+```{r}
+# data
+data_set <- read_csv("E:/AdressCount.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "unique_adresses")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/uniqueadresses_data.csv", row.names = FALSE)
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=unique_adresses)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "unique adresses")
+```
+```{r}
+# data
+data_set <- read_csv("E:/DailyActiveAddresses.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Unique Address Receive Count', 'Unique Address Sent Count')
+colnames(data_set) <- c("date", "receive_count", "sent_count")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/active_addresses_data.csv", row.names = FALSE)
+
+# plot
+# data_set %>%
+#   ggplot( aes(x=date, y=ecr20_transfers)) +
+#     geom_line(color="#69b3a2") +
+#   labs(y= "ecr20 transfers")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 100
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "unique active address count"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$receive_count
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+  geom_line( aes(y=sent_count), size=0.8, color="red") +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+
+```{r}
+library(zoo)
+# google trends
+googletrends <- read_csv("E:/GoogleTrends.csv")
+googletrends
+colnames(googletrends) <- c("date", "searches")
+# this is going to stretch the weekly data to daily
+googletrends <- googletrends %>%
+  mutate(date = as.Date(date)) %>%
+  complete(date = seq.Date(min(date), max(date), by="day"))
+
+googletrends <- na.locf(googletrends)                
+
+```
+```{r}
+googletrends$date <- parse_date_time(googletrends$date, orders = "ymd")
+googletrends
+# plot
+googletrends %>%
+  ggplot( aes(x=date, y=searches)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "google search index")
+
+# write.csv(googletrends,"E:/googletrends_data.csv", row.names = FALSE)
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 50
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- googletrends
+other_y_axis_name <- "google search index"
+other_y_axis_variable <- googletrends$searches
+
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+
+dataset_graph <- na.omit(dataset_graph)
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) + 
+  geom_line( aes(y=price/coeff), size=0.8, color=priceColor) +
+  
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~./coeff, name=paste(paste(paste("price","/"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/AverageDailyTransactionFee.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Average Txn Fee (USD)')
+colnames(data_set) <- c("date", "avg_fee")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/averagefee_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=avg_fee)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "average fee")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 100
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "average fee (USD$)"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$avg_fee
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price/coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~./coeff, name=paste(paste(paste("price","/"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/MiningDifficulty.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "difficulty")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/miningdifficulty_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=difficulty)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "difficulty")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 2
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "difficulty"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$difficulty
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/HashRate.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "hashrate")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/hasrate_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=hashrate)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "hashrate")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 150
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "hashrate"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$hashrate
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/BTC-USD.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date', 'Close')
+colnames(data_set) <- c("date", "btcprice")
+
+data_set$date <- parse_date_time(data_set$date, orders = "ymd")
+data_set
+# write.csv(data_set,"E:/hasrate_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=btcprice)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "hashrate")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 10
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "hashrate"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$btcprice
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/BlockSize.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "blocksize")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/blocksize_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=blocksize)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "blocksize")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 20
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "blocksize"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$blocksize
+
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+
+```{r}
+# data
+data_set <- read_csv("E:/TransactionFee.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date(UTC)', 'Value')
+colnames(data_set) <- c("date", "transactionfee")
+
+data_set$date <- parse_date_time(data_set$date, orders = "mdy")
+data_set
+# write.csv(data_set,"E:/transactionfee_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=transactionfee)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "transactionfee")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 4e+18
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "transactionfee"
+dataset_graph <- left_join(ethprice, dataset_graph, by="date")
+other_y_axis_variable <- dataset_graph$transactionfee
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/BTCHashRate.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Timestamp', 'hash-rate')
+colnames(data_set) <- c("date", "btchashrate")
+
+data_set$date <- parse_date_time(data_set$date, orders = "ymdHMS")
+data_set$date <- as.Date(data_set$date,
+  format = "%m-%d-%y")
+data_set
+# write.csv(data_set,"E:/btchashrate_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=btchashrate)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "btchashrate")
+
+# overlaying plot
+# Value used to transform the data
+coeff <- 2e4
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "btchashrate"
+dataset_graph <- left_join(dataset_graph, ethprice, by="date")
+other_y_axis_variable <- dataset_graph$btchashrate
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/ETH-USD.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('Date', 'Volume')
+colnames(data_set) <- c("date", "volume")
+
+data_set$date <- parse_date_time(data_set$date, orders = "ymd")
+data_set
+# write.csv(data_set,"E:/btchashrate_data.csv", row.names = FALSE)
+
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=volume)) +
+    geom_line(color="#69b3a2") +
+  labs(y= "volume")
+
+```
+```{r}
+# overlaying plot
+# Value used to transform the data
+coeff <- 2e6
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "volume"
+dataset_graph <- left_join(dataset_graph, ethprice, by="date")
+other_y_axis_variable <- dataset_graph$volume
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
+data_set <- read_csv("E:/S&P 500 Historical Data.csv")
+data_set
+sum(is.na(data_set))
+
+data_set <- data_set %>% select('Date', 'Price')
+colnames(data_set) <- c("date", "s&p500")
+
+data_set$date <- parse_date_time(data_set$date, orders = "%m%d,%y")
+data_set$date <- as.Date(data_set$date,
+  format = "%m-%d-%y")
+data_set
+
+# write.csv(data_set,"E:/s&p500_data.csv", row.names = FALSE)
+```
+```{r}
+# data
+data_set <- read_csv("E:/S&P 500 Historical Data.csv")
+data_set
+sum(is.na(data_set))
+
+data_set <- data_set %>% select('Date', 'Price')
+colnames(data_set) <- c("date", "s&p500")
+
+data_set$date <- parse_date_time(data_set$date, orders = "%m%d,%y")
+data_set$date <- as.Date(data_set$date,
+  format = "%m-%d-%y")
+data_set
+
+# write.csv(data_set,"E:/s&p500_data.csv", row.names = FALSE)
+```
+```{r}
+# data
+data_set <- read_csv("E:/Gold Futures Historical Data.csv")
+data_set
+sum(is.na(data_set))
+
+data_set <- data_set %>% select('Date', 'Price')
+colnames(data_set) <- c("date", "GOLD")
+
+data_set$date <- parse_date_time(data_set$date, orders = "%m%d,%y")
+data_set$date <- as.Date(data_set$date,
+  format = "%m-%d-%y")
+data_set
+
+# write.csv(data_set,"E:/gold_data.csv", row.names = FALSE)
+```
+```{r}
+# data
+data_set <- read_csv("E:/Crude Oil WTI Futures Historical Data.csv")
+data_set
+sum(is.na(data_set))
+
+data_set <- data_set %>% select('Date', 'Price')
+colnames(data_set) <- c("date", "OIL")
+
+data_set$date <- parse_date_time(data_set$date, orders = "%m%d,%y")
+data_set$date <- as.Date(data_set$date,
+  format = "%m-%d-%y")
+data_set
+
+# write.csv(data_set,"E:/crudeoil_data.csv", row.names = FALSE)
+```
+```{r}
+# creating the dataset that will undergo the correlation and exploratory data analysis
+activeaddresses_data <- read_csv("E:/activeaddresses_data.csv")
+
+averagefee_data <- read_csv("E:/averagefee_data.csv")
+
+blocksize_data <- read_csv("E:/blocksize_data.csv")
+
+btchashrate_data <- read_csv("E:/btchashrate_data.csv")
+
+crudeoil_data <- read_csv("E:/crudeoil_data.csv")
+
+erc20transfers_data <- read_csv("E:/erc20transfers_data.csv")
+
+# 
+ethburnt_data <- read_csv("E:/ethburnt_data.csv")
+
+ethprice_data <- read_csv("E:/ethprice_data.csv")
+
+gold_data <- read_csv("E:/gold_data.csv")
+
+googletrends_data <- read_csv("E:/googletrends_data.csv")
+
+hasrate_data <- read_csv("E:/hasrate_data.csv")
+
+marketcap_data <- read_csv("E:/marketcap_data.csv")
+
+# 
+miningdifficulty_data <- read_csv("E:/miningdifficulty_data.csv")
+
+sandp500_data <- read_csv("E:/s&p500_data.csv")
+
+transactionfee_data <- read_csv("E:/transactionfee_data.csv")
+
+transactions_data <- read_csv("E:/transactions_data.csv")
+
+tweet_volume_data <- read_csv("E:/tweet_volume_data.csv")
+
+uniqueadresses_data <- read_csv("E:/uniqueadresses_data.csv")
+
+vix_data <- read_csv("E:/vix_data.csv")
+
+# newssentiment_data <- read_csv("E:/newssentiment_data.csv") 
+
+library(plyr)
+blockchain_data <-  join_all(list(ethprice_data ,activeaddresses_data,averagefee_data,blocksize_data, btchashrate_data, crudeoil_data, erc20transfers_data, gold_data, googletrends_data, hasrate_data, marketcap_data, miningdifficulty_data, sandp500_data, transactionfee_data, transactions_data, tweet_volume_data, uniqueadresses_data, vix_data), by='date', type='left')
+
+tail(blockchain_data)
+```

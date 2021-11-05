@@ -1,0 +1,7 @@
+"0","data_set <- data_set %>% select('Timestamp', 'hash-rate')"
+"0","colnames(data_set) <- c(""date"", ""btchashrate"")"
+"0",""
+"0","data_set$date <- parse_date_time(data_set$date, orders = ""ymdHMS"")"
+"0","data_set$date <- as.Date(data_set$date,"
+"0","  format = ""%m-%d-%y"")"
+"0","data_set"

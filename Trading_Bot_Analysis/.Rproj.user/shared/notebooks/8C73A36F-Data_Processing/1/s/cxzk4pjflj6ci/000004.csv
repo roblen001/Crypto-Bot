@@ -1,0 +1,13 @@
+"0",""
+"0","missingNews <- read_csv(""E:/MissingNews.csv"")"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m-----------------------[39m
+cols(
+  title = [31mcol_character()[39m,
+  link = [31mcol_character()[39m,
+  date = [31mcol_character()[39m,
+  article = [31mcol_character()[39m
+)
+
+"
+"0","head(missingNews, 10)"

@@ -1,0 +1,14 @@
+"0","# data"
+"0","data_set <- read_csv(""E:/AverageDailyTransactionFee.csv"")"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m-----------------------[39m
+cols(
+  `Date(UTC)` = [31mcol_character()[39m,
+  UnixTimeStamp = [32mcol_double()[39m,
+  DateTime = [34mcol_datetime(format = """")[39m,
+  `Average Txn Fee (USD)` = [32mcol_double()[39m,
+  `Average Txn Fee (Ether)` = [32mcol_double()[39m
+)
+
+"
+"0","data_set"

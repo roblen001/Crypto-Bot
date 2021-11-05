@@ -1,0 +1,26 @@
+"0","library(zoo)"
+"2","
+Attaching package: ‘zoo’
+
+"
+"2","The following object is masked from ‘package:imputeTS’:
+
+    na.locf
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+"
+"0","# google trends"
+"0","googletrends <- read_csv(""E:/GoogleTrends.csv"")"
+"2","
+[36m--[39m [1m[1mColumn specification[1m[22m [36m-----------------------[39m
+cols(
+  Week = [34mcol_date(format = """")[39m,
+  `ethereum: (Worldwide)` = [32mcol_double()[39m
+)
+
+"
+"0","googletrends"

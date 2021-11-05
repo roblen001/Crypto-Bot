@@ -1,0 +1,5 @@
+"0","# plot"
+"0","marketcap %>%"
+"0","  ggplot( aes(x=date, y=marketcap)) +"
+"0","    geom_line(color=""#69b3a2"") +"
+"0","  labs(y= ""marketcap"")"
