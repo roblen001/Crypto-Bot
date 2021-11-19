@@ -1,0 +1,26 @@
+---
+title: "cleaning_news_data"
+author: "Roberto Lentini"
+date: "06/11/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+library(scales)
+library(patchwork) # To display 2 charts together
+library(hrbrthemes)
+```
+```{r}
+data <- read_csv("E:/news_data.csv")
+nrow(data)
+cleaned_data <- data %>% filter(!is.na(date))
+nrow(cleaned_data)
+cleaned_data <- cleaned_data %>% filter(article != "Broken Link")
+nrow(cleaned_data)
+sum(is.na(cleaned_data))
+cleaned_data %>% filter(article == "Broken Link")
+# write.csv(cleaned_data,"E:/news_data_final.csv", row.names = FALSE)
+```

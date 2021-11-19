@@ -1,0 +1,52 @@
+---
+title: "exploratory_data_analysis"
+author: "Roberto Lentini"
+date: "08/11/2021"
+output: html_document
+---
+```{r}
+library(corrplot)
+library(lares)
+library(readr)
+library(tidyverse)
+library(hrbrthemes)
+```
+```{r}
+data <- read_csv("E:/cryptoanalysis_data.csv")
+```
+```{r}
+corr_data <- data %>% select(!date)
+corr <- cor(corr_data)
+corrplot(corr, method = "circle", order = "hclust") 
+corr_cross(corr_data, 
+  max_pvalue = 0.05, 
+  top = 15
+)
+price_corr <- as.data.frame(corr)
+price_corr <- price_corr %>% select(price)
+price_corr
+```
+```{r}
+# overlaying plot
+coeff <- 200
+ggplot(data, aes(x=date)) +
+  
+  geom_line( aes(y=UVYX), size=0.8, color="blue") +
+  geom_line( aes(y=transactions/coeff), size=0.8, color="orange") +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "UVYX",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("Transactions","/"),as.character(coeff)),""))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = "blue", size=13),
+    axis.title.y.right = element_text(color = "orange", size=13))
+```
+

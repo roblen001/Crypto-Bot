@@ -821,6 +821,67 @@ ggplot(dataset_graph, aes(x=date)) +
 ```
 ```{r}
 # data
+data_set <- read_csv("E:/sentiment_data.csv")
+data_set
+sum(is.na(data_set))
+```
+```{r}
+data_set <- data_set %>% select('date', 'sentiment_label')
+colnames(data_set) <- c("date", "sentiment_label")
+
+data_set$date <- parse_date_time(data_set$date, orders = "ymd")
+data_set
+# write.csv(data_set,"E:/btchashrate_data.csv", row.names = FALSE)
+```
+```{r}
+data_set
+
+data_set <- data_set %>% 
+  group_by(date) %>% 
+  summarise(n = n(),sentiment_label = sum(sentiment_label))
+```
+```{r}
+# plot
+data_set %>%
+  ggplot( aes(x=date, y=scale((sentiment_label/n)*100))) +
+    geom_line(color="#69b3a2") +
+  labs(y= "standarized_percent_positive")
+
+```
+```{r}
+# overlaying plot
+# Value used to transform the data
+coeff <- 2e6
+# A few constants
+other_y_axis_col <- "blue"
+priceColor <- "orange"
+dataset_graph <- data_set
+other_y_axis_name <- "volume"
+dataset_graph <- left_join(dataset_graph, ethprice, by="date")
+other_y_axis_variable <- dataset_graph$volume
+ggplot(dataset_graph, aes(x=date)) +
+  
+  geom_line( aes(y=other_y_axis_variable), size=0.8, color=other_y_axis_col) +
+  geom_line( aes(y=price*coeff), size=0.8, color=priceColor) +
+
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = other_y_axis_name,
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name=paste(paste(paste("price","*"),as.character(coeff))," (USD$)"))
+  ) + 
+  
+  theme_ipsum() +
+
+  theme(
+    axis.title.y = element_text(color = other_y_axis_col, size=13),
+    axis.title.y.right = element_text(color = priceColor, size=13)
+  ) 
+```
+```{r}
+# data
 data_set <- read_csv("E:/S&P 500 Historical Data.csv")
 data_set
 sum(is.na(data_set))
@@ -925,10 +986,31 @@ uniqueadresses_data <- read_csv("E:/uniqueadresses_data.csv")
 
 vix_data <- read_csv("E:/vix_data.csv")
 
-# newssentiment_data <- read_csv("E:/newssentiment_data.csv") 
+uvyx_data <- read_csv("E:/uvyx_data.csv")
+# newssentiment_data <- read_csv("E:/newssentiment_data.csv")
 
 library(plyr)
-blockchain_data <-  join_all(list(ethprice_data ,activeaddresses_data,averagefee_data,blocksize_data, btchashrate_data, crudeoil_data, erc20transfers_data, gold_data, googletrends_data, hasrate_data, marketcap_data, miningdifficulty_data, sandp500_data, transactionfee_data, transactions_data, tweet_volume_data, uniqueadresses_data, vix_data), by='date', type='left')
+blockchain_data <-  join_all(list(ethprice_data ,activeaddresses_data,averagefee_data,blocksize_data, btchashrate_data, crudeoil_data, erc20transfers_data, gold_data, googletrends_data, hasrate_data, marketcap_data, miningdifficulty_data, sandp500_data, transactionfee_data, transactions_data, tweet_volume_data, uniqueadresses_data, vix_data, uvyx_data), by='date', type='left')
 
-tail(blockchain_data)
+blockchain_data
+```
+```{r}
+library(imputeTS)
+# imputing stock data and btchash rate with the last values
+blockchain_data$btchashrate <- na_locf(blockchain_data$btchashrate)
+blockchain_data$OIL <- na_locf(blockchain_data$OIL)
+blockchain_data$GOLD <- na_locf(blockchain_data$GOLD)
+blockchain_data$`s&p500` <- na_locf(blockchain_data$`s&p500`)
+blockchain_data$VIX <- na_locf(blockchain_data$VIX)
+blockchain_data$UVYX <- na_locf(blockchain_data$UVYX)
+
+# tweet count missing values at the start and the end so we will shave off data
+blockchain_data <- blockchain_data %>% drop_na(tweet_count)
+# shave of start data to remove missing value of searches
+blockchain_data <- blockchain_data %>% drop_na(searches)
+
+head(blockchain_data)
+
+write.csv(blockchain_data,"E:/cryptoanalysis_data.csv", row.names = FALSE)
+
 ```
