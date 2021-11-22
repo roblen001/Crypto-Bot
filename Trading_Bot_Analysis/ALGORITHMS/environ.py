@@ -18,9 +18,9 @@ DEFAULT_COMMISSION_PERC = 0.1
 
 
 class Actions(enum.Enum):
-    skip = 0
-    buy = 1
-    close = 2
+    Skip = 0
+    Buy = 1
+    Close = 2
 
 
 class State:
@@ -168,7 +168,7 @@ class State1D(State):
         return res
 
 
-class CryptoEnv(gym.Env):
+class StocksEnv(gym.Env):
     '''Setting up the crypto enviroment
 
         - prices: dict of one or more crypto prices
@@ -186,7 +186,7 @@ class CryptoEnv(gym.Env):
         - volumes: switches on volumes in observations (TODO REMOVE THIS IF IT DOES WHAT I THINK IT DOES)
     '''
     metadata = {'render.modes': ['humans']}
-    spec = EnvSpec("CryptoEnv-v0")
+    spec = EnvSpec("StocksEnv-v0")
 
     def __init__(self, prices, bars_count=DEFAULT_BARS_COUNT,
                  commission=DEFAULT_COMMISSION_PERC,
@@ -211,63 +211,64 @@ class CryptoEnv(gym.Env):
         self.random_ofs_on_reset = random_ofs_on_reset
         self.seed()
 
-        def reset(self):
-            '''Dictates how the environment will be reset.
-            '''
-            # make selection of the instrument and it's offset. Then reset the state
-            self._instrument = self.np_random.choice(
-                list(self._prices.keys()))
-            prices = self._prices[self._instrument]
-            bars = self._state.bars_count
-            if self.random_ofs_on_reset:
-                offset = self.np_random.choice(
-                    prices.high.shape[0]-bars*10) + bars
-            else:
-                offset = bars
-            self._state.reset(prices, offset)
-            return self._state.encode()
+    def reset(self):
+        '''Dictates how the environment will be reset.
+        '''
+        # make selection of the instrument and it's offset. Then reset the state
+        self._instrument = self.np_random.choice(
+            list(self._prices.keys()))
+        prices = self._prices[self._instrument]
+        bars = self._state.bars_count
+        if self.random_ofs_on_reset:
+            offset = self.np_random.choice(
+                prices.high.shape[0]-bars*10) + bars
+        else:
+            offset = bars
+        self._state.reset(prices, offset)
+        return self._state.encode()
 
-        def step(self, action_idx):
-            '''Dictates how steps are taking in the environment.
+    def step(self, action_idx):
+        '''Dictates how steps are taking in the environment.
 
-                - action_idx: the index of the action to take.
-            '''
-            action = Actions(action_idx)
-            reward, done = self._state.step(action)
-            obs = self._state.encode()
-            info = {
-                "instrument": self._instrument,
-                "offset": self._state._offset
-            }
-            return obs, reward, done, info
+            - action_idx: the index of the action to take.
+        '''
+        action = Actions(action_idx)
+        reward, done = self._state.step(action)
+        obs = self._state.encode()
+        info = {
+            "instrument": self._instrument,
+            "offset": self._state._offset
+        }
+        return obs, reward, done, info
 
-        def render(self, mode='human', close=False):
-            '''Can render the current state in human or machine readable format.
-                Currently not being used in our env.
-            '''
-            pass
+    def render(self, mode='human', close=False):
+        '''Can render the current state in human or machine readable format.
+            Currently not being used in our env.
+        '''
+        pass
 
-        def close(self):
-            '''Gets called on the enviroment destruction to free resources.
-            '''
-            pass
+    def close(self):
+        '''Gets called on the enviroment destruction to free resources.
+        '''
+        pass
 
-        def seed(self, seed=None):
-            '''Allows to generate multiple random environments at once. This is useful
-                for algorithms using multiple environments at once such as A3C.
-            '''
-            self.np_random, seed1 = seeding.np_random(seed)
-            seed2 = seeding.hash_seed(seed1 + 1) % 2 ** 31
+    def seed(self, seed=None):
+        '''Allows to generate multiple random environments at once. This is useful
+            for algorithms using multiple environments at once such as A3C.
+        '''
+        self.np_random, seed1 = seeding.np_random(seed)
+        seed2 = seeding.hash_seed(seed1 + 1) % 2 ** 31
 
-            return [seed1, seed2]
+        return [seed1, seed2]
 
-        # TODO: MODIFY THIS FOR MY USE CASE
+    # TODO: MODIFY THIS FOR MY USE CASE
 
-        @classmethod
-        def from_dir(cls, data_dir, **kwargs):
-            '''Load data into the enviroment (only has 5 columns)
-            '''
-            prices = {
-                file: data.load_relative(file)
-                for file in data.price_files(data_dir)
-            }
+    @classmethod
+    def from_dir(cls, data_dir, **kwargs):
+        '''Load data into the enviroment (only has 5 columns)
+        '''
+        prices = {
+            file: data.load_relative(file)
+            for file in data.price_files(data_dir)
+        }
+        return StocksEnv(prices, **kwargs)

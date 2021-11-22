@@ -1,7 +1,7 @@
 '''DQN algorithm 3 convolution layers and 2 connected layers with ReLU seperation
 
     Source: https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On-Second-Edition/blob/master/Chapter10/lib/data.py
-    Modified: Roberto Lentini 
+    Modified: Roberto Lentini
 '''
 import torch
 import torch.nn as nn
@@ -13,12 +13,12 @@ class DQN(nn.Module):
         super(DQN, self).__init__()
 
         self.conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
+            nn.Conv1d(input_shape[0], 128, 5),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
+            nn.Conv1d(128, 128, 5),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU()
+            # nn.Conv1d(64, 64, kernel_size=3, stride=1),
+            # nn.ReLU()
         )
 
         conv_out_size = self._get_conv_out(input_shape)

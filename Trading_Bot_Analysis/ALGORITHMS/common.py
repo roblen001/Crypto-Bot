@@ -96,6 +96,8 @@ def setup_ignite(engine: Engine, exp_source, run_name: str,
 
     now = datetime.now().isoformat(timespec='minutes')
     logdir = f"runs/{now}-{run_name}"
+    # can't have : in a file name
+    logdir = logdir.replace(":", "")
     tb = tb_logger.TensorboardLogger(log_dir=logdir)
     run_avg = RunningAverage(output_transform=lambda v: v['loss'])
     run_avg.attach(engine, "avg_loss")

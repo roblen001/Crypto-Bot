@@ -80,9 +80,8 @@ if __name__ == "__main__":
     env = gym.wrappers.TimeLimit(env, max_episode_steps=1000)
     val_data = {"YNDX": data.load_relative(val_path)}
     env_val = environ.StocksEnv(val_data, bars_count=BARS_COUNT, state_1d=True)
-
-    net = DQN(env.observation_space.shape,
-              env.action_space.n).to(device)
+    net = DQN.DQN(env.observation_space.shape,
+                  env.action_space.n).to(device)
     tgt_net = ptan.agent.TargetNet(net)
 
     selector = ptan.actions.EpsilonGreedyActionSelector(EPS_START)
