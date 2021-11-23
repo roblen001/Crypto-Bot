@@ -10,7 +10,11 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3 import DQN
 
 import matplotlib.pyplot as plt
+from stable_baselines3.common.results_plotter import plot_results
+import os
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
+
 
 # basic ethereum testing data
 df = pd.read_csv('ETHUSD.csv', parse_dates=True, index_col='Date')
@@ -40,6 +44,15 @@ env = DummyVecEnv([env_maker])
 #     net_arch=[64, 'lstm', dict(vf=[128, 128, 128], pi=[64, 64])])
 model = DQN('MlpPolicy', env, verbose=1)
 model.learn(total_timesteps=100000)
+
+mean_reward, std_reward = evaluate_policy(
+    model, model.get_env(), n_eval_episodes=10)
+print('=========MEAN REWARD=======')
+print(mean_reward)
+# plot_results(
+#     [log_dir], time_steps, results_plotter.X_TIMESTEPS, "DDPG LunarLander")
+# plt.show()
+
 env = env_maker()
 observation = env.reset()
 reward_list = []

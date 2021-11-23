@@ -1,0 +1,21 @@
+'''Training and backtesting DQN algorithm with experience replay and target network.
+
+    author: Roberto Lentini
+    email: roberto.lentini@mail.utoronto.ca
+    date: November 23rd 2021
+'''
+
+from stable_baselines3 import A2C
+from gym_mtsim import (
+    Timeframe, SymbolInfo,
+    MtSimulator, OrderType, Order, SymbolNotFound, OrderNotFound,
+    MtEnv,
+    FOREX_DATA_PATH, STOCKS_DATA_PATH, CRYPTO_DATA_PATH, MIXED_DATA_PATH,
+)
+import gym
+import pandas as pd
+
+# creating the trading environment
+df = pd.read_csv('ETHUSD.csv', parse_dates=True, index_col='Date')
+
+env = gym.make('crypto-hedge-v0')
