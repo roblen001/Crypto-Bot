@@ -6,6 +6,7 @@
     email: roberto.lentini@mail.utoronto.ca
     date: November 23rd 2021
 '''
+from numpy.core.fromnumeric import shape
 from stable_baselines3.common.env_checker import check_env
 import pandas as pd
 from collections import deque
@@ -13,6 +14,7 @@ import random
 import numpy as np
 import gym
 from gym import spaces
+from stable_baselines3 import DQN
 
 
 class CustomEnv(gym.Env):
@@ -40,15 +42,27 @@ class CustomEnv(gym.Env):
         self.orders_history = deque(maxlen=self.lookback_window_size)
 
         # Market history contains the open, high, low, close, volume values for the last lookback_window_size prices
-        self.market_history = deque(maxlen=self.lookback_window_size)
-
+        # self.market_history = deque(maxlen=self.lookback_window_size)
+        self.market_history = {'Open' : deque(maxlen=self.lookback_window_size),
+        'High' : deque(maxlen=self.lookback_window_size),
+        'Low' : deque(maxlen=self.lookback_window_size),
+        'Close' : deque(maxlen=self.lookback_window_size),
+        'Volume' : deque(maxlen=self.lookback_window_size),
+        }
         # State size contains Market+Orders history for the last lookback_window_size steps
         # TODO: the 10 will be switch the the number of columns in the crypto_analysis dataset
         self.state_size = (self.lookback_window_size, 10)
-
         # spaces
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=self.state_size, dtype=np.float32)
+        dict = {
+            'Open': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(10,)),
+            'High': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(10,)),
+            'Low': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(10,)),
+            'Close': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(10,)),
+            'Volume': gym.spaces.Box(low=-np.inf, high=np.inf, shape=(10,)),
+            } 
+        self.observation_space = gym.spaces.Dict(dict)
         # actions ([hold, buy, sell])
         self.action_space = spaces.Discrete(3)
 
@@ -56,14 +70,38 @@ class CustomEnv(gym.Env):
         '''Get the data points for the given current_step
         '''
         # TODO: modify this for my enviromental variables
-        self.market_history.append([self.df.loc[self.current_step, 'Open'],
-                                    self.df.loc[self.current_step, 'High'],
-                                    self.df.loc[self.current_step, 'Low'],
-                                    self.df.loc[self.current_step, 'Close'],
-                                    self.df.loc[self.current_step, 'Volume']
-                                    ])
-        obs = np.concatenate(
-            (self.market_history, self.orders_history), axis=1)
+        # self.market_history.append([self.df.loc[self.current_step, 'Open'],
+        #                             self.df.loc[self.current_step, 'High'],
+        #                             self.df.loc[self.current_step, 'Low'],
+        #                             self.df.loc[self.current_step, 'Close'],
+        #                             self.df.loc[self.current_step, 'Volume']
+        #                             ])
+        # TODO: this method of going from np.array to  deque to append and then back to 
+        #       numpy.array to please openAi gym is sketchy
+        
+        if isinstance(self.market_history["Open"],np.ndarray):
+            self.market_history = {'Open': deque(self.market_history["Open"].tolist(), maxlen=self.lookback_window_size),
+                                        'High' : deque(self.market_history["High"].tolist(), maxlen=self.lookback_window_size),
+                                        'Low' : deque(self.market_history["Low"].tolist(), maxlen=self.lookback_window_size),
+                                        'Close' : deque(self.market_history["Close"].tolist(), maxlen=self.lookback_window_size),
+                                        'Volume' : deque(self.market_history["Volume"].tolist(), maxlen=self.lookback_window_size)}
+
+        self.market_history["Open"].append(self.df.loc[self.current_step, 'Open'])
+        self.market_history["High"].append(self.df.loc[self.current_step, 'High'])
+        self.market_history["Low"].append(self.df.loc[self.current_step, 'Low'])
+        self.market_history["Close"].append(self.df.loc[self.current_step, 'Close'])
+        self.market_history["Volume"].append(self.df.loc[self.current_step, 'Volume'])
+
+        self.market_history = {'Open': np.array(self.market_history["Open"]),
+                                    'High' : np.array(self.market_history["High"]),
+                                    'Low' : np.array(self.market_history["Low"]),
+                                    'Close' : np.array(self.market_history["Close"]),
+                                    'Volume' : np.array(self.market_history["Volume"])
+        }   
+
+        obs = self.market_history
+        # obs = np.concatenate(
+        #     (self.market_history, self.orders_history), axis=1)
         return obs
 
     def step(self, action):
@@ -101,7 +139,7 @@ class CustomEnv(gym.Env):
         # keeping track of transactions TODO: add time point for visualization
         self.orders_history.append(
             [self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
-
+        
         # Calculate reward is the diff between total trading profits in percent - total eth gains in percent
         # TODO: maked sure the reward functions is doing the proper calculations
         buy_and_hold_gains_percent = (
@@ -117,7 +155,12 @@ class CustomEnv(gym.Env):
             done = False
 
         obs = self._next_observation()
-        return obs, reward, done
+        # required
+        info = dict(
+            total_reward = reward,
+            total_profit = self.net_worth - self.initial_balance,
+        )
+        return obs, reward, done, info
 
     def reset(self, env_steps_size=0):
         '''Reset the env to an initial state.
@@ -131,6 +174,15 @@ class CustomEnv(gym.Env):
         self.crypto_held = 0
         self.crypto_sold = 0
         self.crypto_bought = 0
+
+        # TODO: use more elegant method
+        # converting the np.arrays to list for function to work
+        if isinstance(self.market_history["Open"],np.ndarray):
+            self.market_history = {'Open': deque(self.market_history["Open"].tolist(), maxlen=self.lookback_window_size),
+                                        'High' : deque(self.market_history["High"].tolist(), maxlen=self.lookback_window_size),
+                                        'Low' : deque(self.market_history["Low"].tolist(), maxlen=self.lookback_window_size),
+                                        'Close' : deque(self.market_history["Close"].tolist(), maxlen=self.lookback_window_size),
+                                        'Volume' : deque(self.market_history["Volume"].tolist(), maxlen=self.lookback_window_size)}
         if env_steps_size > 0:  # used for training dataset
             self.start_step = random.randint(
                 self.lookback_window_size, self.df_total_steps - env_steps_size)
@@ -145,24 +197,36 @@ class CustomEnv(gym.Env):
             current_step = self.current_step - i
             self.orders_history.append(
                 [self.balance, self.net_worth, self.crypto_bought, self.crypto_sold, self.crypto_held])
-            self.market_history.append([self.df.loc[current_step, 'Open'],
-                                        self.df.loc[current_step, 'High'],
-                                        self.df.loc[current_step, 'Low'],
-                                        self.df.loc[current_step, 'Close'],
-                                        self.df.loc[current_step, 'Volume']
-                                        ])
+            # self.market_history.append([self.df.loc[current_step, 'Open'],
+            #                             self.df.loc[current_step, 'High'],
+            #                             self.df.loc[current_step, 'Low'],
+            #                             self.df.loc[current_step, 'Close'],
+            #                             self.df.loc[current_step, 'Volume']
+            #                             ])
+            self.market_history["Open"].append(self.df.loc[current_step, 'Open'])
+            self.market_history["High"].append(self.df.loc[current_step, 'High'])
+            self.market_history["Low"].append(self.df.loc[current_step, 'Low'])
+            self.market_history["Close"].append(self.df.loc[current_step, 'Close'])
+            self.market_history["Volume"].append(self.df.loc[current_step, 'Volume'])
 
-        state = np.concatenate(
-            (self.market_history, self.orders_history), axis=1)
-        print(np.shape(state))
-        print(np.shape(self.observation_space))
-
+        self.market_history = {'Open': np.array(self.market_history["Open"]),
+                                    'High' : np.array(self.market_history["High"]),
+                                    'Low' : np.array(self.market_history["Low"]),
+                                    'Close' : np.array(self.market_history["Close"]),
+                                    'Volume' : np.array(self.market_history["Volume"])
+        }        
+        # state = np.concatenate(
+        #     (self.market_history, self.orders_history), axis=1)
+        state = self.market_history
+        print('==============HERE===================')
+        print(state)
         return state  # reward, done, info can't be included
 
     def render(self, mode='human'):
         '''Allows us to visualize how the agent learns.
         '''
         print(f'Step: {self.current_step}, Net Worth: {self.net_worth}')
+        
 
 
 #  ================= END OF ENV SETUP =============================
@@ -182,7 +246,7 @@ def Random_games(env, train_episodes=50, training_batch_size=500):
 
             action = np.random.randint(3, size=1)[0]
 
-            state, reward, done = env.step(action)
+            state, reward, done, info = env.step(action)
 
             if env.current_step == env.end_step:
                 average_net_worth += env.net_worth
@@ -193,7 +257,6 @@ def Random_games(env, train_episodes=50, training_batch_size=500):
 
 
 df = pd.read_csv('ETHUSD.csv')
-df = df.sort_values('Date')
 
 lookback_window_size = 10
 train_df = df[:-720-lookback_window_size]
@@ -201,7 +264,17 @@ test_df = df[-720-lookback_window_size:]  # 30 days
 
 train_env = CustomEnv(train_df, lookback_window_size=lookback_window_size)
 test_env = CustomEnv(test_df, lookback_window_size=lookback_window_size)
+env = CustomEnv(df, lookback_window_size=lookback_window_size)
+# check_env(env)
 
-env = CustomEnv(train_df, lookback_window_size=lookback_window_size)
-check_env(env)
-# Random_games(train_env, train_episodes=10, training_batch_size=500)
+Random_games(train_env, train_episodes=10, training_batch_size=500)
+# model = DQN("MultiInputPolicy", env, verbose=1)
+# model.learn(total_timesteps=10000, log_interval=4)
+
+# obs = env.reset()
+# while True:
+#     action, _states = model.predict(obs, deterministic=True)
+#     obs, reward, done, info = env.step(action)
+#     env.render()
+#     if done:
+#       obs = env.reset()
