@@ -26,7 +26,7 @@ const NewsSection = () => {
     try {
       const response = await axios.get(
         // limit this to 10 so it can fit in container
-        "http://192.168.2.117:5000/news/top/8"
+        "http://add created address here/news/top/8"
       )
       let data = response.data
       console.log("top")
@@ -42,7 +42,7 @@ const NewsSection = () => {
     try {
       const response = await axios.get(
         // limit this to 10 so it can fit in container
-        "http://192.168.2.117:5000/news/all/8"
+        "http://add created address here/news/all/8"
       )
 
       let data = response.data

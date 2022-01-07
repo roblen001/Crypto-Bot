@@ -96,24 +96,26 @@ const RightSideSection = () => {
   async function fetchData() {
     try {
       const response1 = await axios.get(
-        "http://192.168.2.117:5000/botstatistics/netprofits"
+        "http://add created address here/botstatistics/netprofits"
       )
       const response2 = await axios.get(
-        "http://192.168.2.117:5000/botstatistics/positivetrades"
+        "http://add created address here/botstatistics/positivetrades"
       )
       const response3 = await axios.get(
-        "http://192.168.2.117:5000/botstatistics/comparestrategy"
+        "http://add created address here/botstatistics/comparestrategy"
       )
 
       const response4 = await axios.get(
-        "http://192.168.2.117:5000/botfeeder/feedingHistoryData/8"
+        "http://add created address here/botfeeder/feedingHistoryData/8"
       )
 
       const response5 = await axios.get(
-        "http://192.168.2.117:5000/botfeeder/totalFed/0"
+        "http://add created address here/botfeeder/totalFed/0"
       )
 
-      const response6 = await axios.get("http://192.168.2.117:5000/getBalance")
+      const response6 = await axios.get(
+        "http://add created address here/getBalance"
+      )
 
       let stat1 = response1.data
       setNetProfits(stat1.toFixed(2))
@@ -233,13 +235,16 @@ const RightSideSection = () => {
                 const feed = { amount: inputData, timestamp: timestamp }
 
                 axios
-                  .post("http://192.168.2.117:5000/botFeederAddData", feed)
+                  .post(
+                    "http://add created address here/botFeederAddData",
+                    feed
+                  )
                   .then(res => {
                     console.log(res.data)
                   })
                 setInputData(null)
                 // axios
-                //   .get("http://127.0.0.1:5000/botfeeder/feedingHistoryData/8")
+                //   .get("http://add created ip addy here/botfeeder/feedingHistoryData/8")
                 //   .then(response => setBotFeederHistoricalData(response.data))
               }}
             >

@@ -19,7 +19,7 @@ const TransactionSection = () => {
     try {
       const response = await axios.get(
         // limit this to 10 so it can fit in container
-        "http://192.168.2.117:5000/all_transaction_history/10"
+        "http://add created address here/all_transaction_history/10"
       )
       let data = response.data
       setTransactionHistory(data)
