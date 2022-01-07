@@ -67,8 +67,7 @@ def newsscraper(type):
                 previous_height = new_height
 
             #  WEB SCRAPING
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"}
+            headers =  # add header
 
             page = requests.get(URL, headers=headers)
 
@@ -96,8 +95,7 @@ def newsscraper(type):
 
             # Scraping individual articles for the text it contains
             #  Should I be scraping list elements too
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"}
+            headers =  # add header
 
             textList = []
             for url in linkList:
@@ -160,8 +158,7 @@ def newsscraper(type):
                 previous_height = new_height
 
             #  WEB SCRAPING
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"}
+            headers =  # add header
 
             page = requests.get(URL, headers=headers)
 
@@ -189,8 +186,7 @@ def newsscraper(type):
 
             # Scraping individual articles for the text it contains
             #  Should I be scraping list elements too
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"}
+            headers =  # add header
 
             textList = []
             for url in linkList:
