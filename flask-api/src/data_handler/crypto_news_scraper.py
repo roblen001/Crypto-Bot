@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import time 
 
 class CryptoNewsScraper:
-    def __init__(self, webdriver_path: str = "../chromedriver-win64/chromedriver"):
+    def __init__(self, webdriver_path: str = "../../chromedriver-win64/chromedriver"):
         self.webdriver_path = webdriver_path
 
     @staticmethod
@@ -83,10 +83,10 @@ class CryptoNewsScraper:
 
         if news_type == 'top':
             url = 'https://cryptonews.net/en/news/top/'
-            csv_file = '../output_data/topNews.csv'
+            csv_file = 'output_data/topNews.csv'
         elif news_type == 'latest':
             url = 'https://cryptonews.net/en/'
-            csv_file = '../output_data/allNews.csv'
+            csv_file = 'output_data/allNews.csv'
         else:
             raise ValueError("Invalid type specified. Must be 'top' or 'latest")
         
@@ -130,7 +130,10 @@ class CryptoNewsScraper:
             time_limit: the max amount of time to scrape for news
         """
         end_time = datetime.now() + timedelta(minutes=time_limit)
-        while datetime.now() < end_time:
+
+        future = datetime.strptime(str(end_time), "%Y-%m-%d %H:%M:%S.%f")
+        now = datetime.strptime(str(datetime.now()), "%Y-%m-%d %H:%M:%S.%f")
+        while now < future:
             driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
             time.sleep(3)
                         
@@ -150,10 +153,12 @@ class CryptoNewsScraper:
             for idx in range(len(df['title'])):
                 if len(df_firstn) > 0:
                     if self.clean_text(df['title'][idx]) == self.clean_text(df_firstn.iloc[0]['title']):
-                        new_df = df.head(idx)
+                        new_df = df.head(idx+1)
                         reversed_df = new_df.iloc[::-1]
                         reversed_df.to_csv(csv_file, mode='a', header=False, index=False)
-                    return
+                        return
+                else:
+                    df_firstn = df
 
         # if the time limit is reached then stop and save
         reversed_df = df.iloc[::-1]

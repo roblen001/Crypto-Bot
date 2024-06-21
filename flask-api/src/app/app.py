@@ -15,6 +15,7 @@ import threading
 from data_handler.crypto_news_scraper import CryptoNewsScraper
 from trading_bot.trading_bot import bot
 import configs.config
+from multiprocessing import Process
 
 # Initialize Binance client DEPRECATED Binance is banned in Canada
 # api = config.API_KEY
@@ -30,15 +31,23 @@ def run_top_news_scraper():
     """Scrapes top news every 30 minutes."""
     scraper = CryptoNewsScraper()
     while True:
-        scraper.get_crypto_news('top')
-        time.sleep(1800)
+        try:
+            scraper.get_crypto_news('top')
+            time.sleep(1800)
+        except:
+            # ADD CODE TO TERMINATE APP HERE
+            raise RuntimeError('failed to start news scraper for top news')
 
 def run_all_news_scraper():
     """Scrapes latest news every 15 minutes."""
     scraper = CryptoNewsScraper()
     while True:
-        scraper.get_crypto_news('latest')
-        time.sleep(900)
+        try:
+            scraper.get_crypto_news('latest')
+            time.sleep(900)
+        except:
+            # ADD CODE TO TERMINATE APP HERE
+            raise RuntimeError('failed to start news scraper for latest news')
 
 def trading_bot():
     """Runs the trading bot."""
@@ -52,7 +61,7 @@ threading.Thread(target=trading_bot).start()
 class AllTransactionHistory(Resource):
     def get(self, limit):
         """Fetch the transaction history with a limit."""
-        df = pd.read_csv("../output_data/transaction_history.csv")
+        df = pd.read_csv("../../output_data/transaction_history.csv")
         limited_data = df.tail(limit).iloc[::-1]
         parsed = limited_data.to_dict(orient="records")
         return parsed
@@ -62,7 +71,7 @@ api.add_resource(AllTransactionHistory, "/all_transaction_history/<int:limit>")
 class News(Resource):
     def get(self, type, limit):
         """Fetch news articles based on type and limit."""
-        path = f'../output_data/{type}News.csv'
+        path = f'../../output_data/{type}News.csv'
         df = pd.read_csv(path)
         limited_data = df.tail(limit).iloc[::-1]
         parsed = limited_data.to_dict(orient="records")
@@ -112,11 +121,11 @@ class BotFeeder(Resource):
     def get(self, type, limit):
         """Fetch feeding history data or total fed amount based on type and limit."""
         if type == 'feedingHistoryData':
-            df = pd.read_csv('../output_data/feedingHistoryData.csv')
+            df = pd.read_csv('../../output_data/feedingHistoryData.csv')
             limited_data = df.tail(limit).iloc[::-1]
             result = limited_data.to_dict(orient="records")
         elif type == 'totalFed':
-            df = pd.read_csv('../output_data/feedingHistoryData.csv')
+            df = pd.read_csv('../../output_data/feedingHistoryData.csv')
             result = int(df['amount'].sum())
         return result
 
@@ -125,7 +134,7 @@ api.add_resource(BotFeeder, "/botfeeder/<string:type>/<int:limit>")
 class BotFeederAddData(Resource):
     def post(self):
         """Add data to the feeding history."""
-        with open('../output_data/feedingHistoryData.csv', 'a') as f_object:
+        with open('../../output_data/feedingHistoryData.csv', 'a') as f_object:
             dictwriter_object = DictWriter(f_object, fieldnames=['amount', 'timestamp'])
             dictwriter_object.writerow(request.get_json(force=True))
             f_object.close()

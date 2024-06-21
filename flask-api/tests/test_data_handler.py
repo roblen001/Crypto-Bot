@@ -108,15 +108,15 @@ def test_initialize_driver(mock_webdriver):
     driver = scraper.initialize_driver()
     assert driver is not None
 
-# A live test to be able to quickly make sure the news scraper works
-def test_live_usecase_news_scraper():
-    """Mocking is for the weak minded...
-    """
-    initial_len = len(pd.read_csv('../output_data/topNews.csv'))
-    scraper = CryptoNewsScraper()
-    scraper.get_crypto_news('top', time_limit=0.15)
-    post_len = len(pd.read_csv('../output_data/topNews.csv'))
 
-    assert post_len >= initial_len
+def test_live_usecase_news_scraper(setup_env):
+    """Mocking is for the weak...
+    """
+    temp_data_dir = setup_env
+    scraper = CryptoNewsScraper(webdriver_path='../chromedriver-win64/chromedriver')
+    scraper.get_crypto_news('top', time_limit=0.05, csv_file_path=temp_data_dir.join('topNews.csv'))
+    post_len = len(pd.read_csv(temp_data_dir.join('topNews.csv')))
+
+    assert post_len > 0
 
     
