@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import TradingViewWidget from "react-tradingview-widget"
+// import TradingViewWidget from "react-tradingview-widget"
 import Binance from "binance-api-node"
 
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -167,12 +167,12 @@ const ChartSection = ({ symbol }) => {
         paddingBottom: "3%",
       }}
     >
-      <TradingViewWidget
+      {/* <TradingViewWidget
         symbol={symbol}
         autosize
         theme="dark"
         studies={["MACD@tv-basicstudies"]}
-      />
+      /> */}
     </div>
   )
 }
