@@ -1,9 +1,0 @@
-Things to do for the project:
-	1) Explain multiprocessing
-	2) Clean code and project folders
-	3) Discuss the results: ie how the bot performed, did it learn, the reward function used
-	4) Test the new reward function and compare to the previous one
-	5) Apply corrections from first paper
-	6) Organize the githubs (merge the different parts into 1)
-	7) Tie the bot to the current front end and migrate to rasberry pie
-	8) Brief correlation analysis on the data
