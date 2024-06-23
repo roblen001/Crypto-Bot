@@ -1,6 +1,0 @@
-"0",""
-"0",""
-"0","ggplot(tweetData, aes(x = date, y = tweet_count)) +"
-"0","  geom_bar(fill = ""#0073C2FF"", stat = ""identity"") +"
-"0","  theme(axis.text.x = element_text(angle = 90)) +"
-"0","  labs(y= ""tweet volume"")"

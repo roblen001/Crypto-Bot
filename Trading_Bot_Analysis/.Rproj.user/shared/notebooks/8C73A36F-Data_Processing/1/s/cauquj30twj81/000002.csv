@@ -1,7 +1,0 @@
-"0","# data cleaning"
-"0","allNews <- allNews[-(1:187),]"
-"0",""
-"0","# removing rows if article data is ""Broken Link"" or empty"
-"0","allNews <- allNews %>% filter(is.na(article) == FALSE | article != ""Broken Link"")"
-"0","missingNews <- missingNews %>% filter(is.na(article) == FALSE | article != ""Broken Link"")"
-"0",""

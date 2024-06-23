@@ -1,2 +1,0 @@
-"0","article_count <- as.data.frame(table(dates))"
-"0","head(article_count)"

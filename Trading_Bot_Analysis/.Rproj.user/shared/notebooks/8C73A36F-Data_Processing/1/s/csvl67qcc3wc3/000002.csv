@@ -1,5 +1,0 @@
-"0","data_set <- data_set %>% select('Date', 'Close')"
-"0","colnames(data_set) <- c(""date"", ""btcprice"")"
-"0",""
-"0","data_set$date <- parse_date_time(data_set$date, orders = ""ymd"")"
-"0","data_set"

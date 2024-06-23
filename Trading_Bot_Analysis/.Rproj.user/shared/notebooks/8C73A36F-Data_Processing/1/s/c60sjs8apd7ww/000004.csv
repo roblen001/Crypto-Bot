@@ -1,4 +1,0 @@
-"0","ggplot(article_count, aes(x = dates, y = Freq)) +"
-"0","  geom_bar(fill = ""#0073C2FF"", stat = ""identity"") +"
-"0","  theme(axis.text.x = element_text(angle = 90)) +"
-"0","  labs(y= ""# articles"")"

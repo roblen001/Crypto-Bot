@@ -1,5 +1,0 @@
-"0","data_set <- data_set %>% select('Date(UTC)', 'Unique Address Receive Count', 'Unique Address Sent Count')"
-"0","colnames(data_set) <- c(""date"", ""receive_count"", ""sent_count"")"
-"0",""
-"0","data_set$date <- parse_date_time(data_set$date, orders = ""mdy"")"
-"0","data_set"

@@ -1,6 +1,0 @@
-"0","nrow(news_data)"
-"1","[1]"
-"1"," 104294"
-"1","
-"
-"0","# write.csv(news_data,""E:/news_data.csv"", row.names = FALSE)"

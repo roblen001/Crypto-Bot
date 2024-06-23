@@ -1,5 +1,0 @@
-"0","# plot"
-"0","googletrends %>%"
-"0","  ggplot( aes(x=date, y=searches)) +"
-"0","    geom_line(color=""#69b3a2"") +"
-"0","  labs(y= ""google search index"")"

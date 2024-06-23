@@ -1,5 +1,0 @@
-"0","marketcap <- marketcap %>% select('Date(UTC)', 'MarketCap')"
-"0","colnames(marketcap) <- c(""date"", ""marketcap"")"
-"0",""
-"0","marketcap$date <- parse_date_time(marketcap$date, orders = ""mdy"")"
-"0","marketcap"

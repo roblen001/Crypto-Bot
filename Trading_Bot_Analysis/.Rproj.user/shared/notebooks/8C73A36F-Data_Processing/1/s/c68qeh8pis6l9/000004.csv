@@ -1,8 +1,0 @@
-"0","colnames(googletrends) <- c(""date"", ""searches"")"
-"0","# this is going to stretch the weekly data to daily"
-"0","googletrends <- googletrends %>%"
-"0","  mutate(date = as.Date(date)) %>%"
-"0","  complete(date = seq.Date(min(date), max(date), by=""day""))"
-"0",""
-"0","googletrends <- na.locf(googletrends)                "
-"0",""

@@ -17,7 +17,7 @@ class MenuCard extends Component {
       defaultColumn: "overview",
       screener_type: "crypto_mkt",
       displayCurrency: "USD",
-      colorTheme: "dark",
+      colorTheme: "light",
       locale: "en",
       isTransparent: false,
     })

@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react"
-// import TradingViewWidget from "react-tradingview-widget"
+import TradingViewWidget from "react-tradingview-widget"
 import Binance from "binance-api-node"
-
-import "bootstrap/dist/css/bootstrap.min.css"
-
-import "./middleGraphsSection.css"
+import styled from "styled-components"
 import MenuCard from "./MenuCard"
 
 const client = Binance()
-
-// Authenticated client, can make signed calls
 const client2 = Binance({
   apiKey: process.env.GATSBY_APIKEY,
   apiSecret: process.env.GATSBY_APISECRET,
@@ -17,163 +12,230 @@ const client2 = Binance({
 
 const MiddleGraphsSection = () => {
   const [symbol, setSymbol] = useState("BTCUSDT")
-  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState(0)
+  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState({})
 
-  // getting symbol statistics
   useEffect(() => {
     client.dailyStats({ symbol: symbol }).then(stat => {
       setDailyStatsForSymbol(stat)
     })
   }, [symbol])
 
-  const dailyHigh = parseFloat(dailyStatsForSymbol.highPrice).toFixed(2)
-  const dailyLow = parseFloat(dailyStatsForSymbol.lowPrice).toFixed(2)
-  const priceChangePercent = dailyStatsForSymbol.priceChangePercent
-  const priceChange = parseFloat(dailyStatsForSymbol.priceChange).toFixed(2)
-  const lastPrice = parseFloat(dailyStatsForSymbol.lastPrice).toFixed(2)
+  const dailyHigh = parseFloat(dailyStatsForSymbol.highPrice || 0).toFixed(2)
+  const dailyLow = parseFloat(dailyStatsForSymbol.lowPrice || 0).toFixed(2)
+  const priceChangePercent = dailyStatsForSymbol.priceChangePercent || 0
+  const priceChange = parseFloat(dailyStatsForSymbol.priceChange || 0).toFixed(
+    2
+  )
+  const lastPrice = parseFloat(dailyStatsForSymbol.lastPrice || 0).toFixed(2)
+
   return (
-    <>
-      {/* bar graph for live market section */}
-      <div
-        style={{
-          flex: 10,
-          display: "flex",
-          flexDirection: "column",
-          background: "#3C4C5E",
-        }}
-      >
-        {/* top header */}
-        <TopHeaderSection
-          setSymbol={setSymbol}
-          symbol={symbol}
-          setDailyStatsForSymbol={setDailyStatsForSymbol}
-          dailyHigh={dailyHigh}
-          dailyLow={dailyLow}
-          priceChangePercent={priceChangePercent}
-          lastPrice={lastPrice}
-          priceChange={priceChange}
-        />
-        {/* Chart */}
-        <ChartSection symbol={symbol} />
-      </div>
-      {/* bot forecast graph section */}
-      <div style={{ flex: 8 }}>
+    <Section>
+      <TopHeaderSection
+        setSymbol={setSymbol}
+        symbol={symbol}
+        dailyHigh={dailyHigh}
+        dailyLow={dailyLow}
+        priceChangePercent={priceChangePercent}
+        lastPrice={lastPrice}
+        priceChange={priceChange}
+      />
+      <ChartSection symbol={symbol} />
+      <MenuCardSection>
         <MenuCard />
-      </div>
-    </>
+      </MenuCardSection>
+    </Section>
   )
 }
 
-// Top header section
 const TopHeaderSection = ({
   setSymbol,
   symbol,
-  setDailyStatsForSymbol,
   dailyHigh,
   dailyLow,
   priceChangePercent,
   lastPrice,
   priceChange,
 }) => {
-  function handleSelectChange(event) {
-    setSymbol(event.target.value)
+  const handleTabChange = tab => {
+    setSymbol(tab)
   }
 
   return (
-    <div
-      style={{
-        flex: 3,
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-evenly",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          height: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <select
-          className="dropDown"
-          value={symbol}
-          onChange={handleSelectChange}
+    <Header>
+      <ToggleSwitch>
+        <ToggleOption
+          active={symbol === "BTCUSDT"}
+          onClick={() => handleTabChange("BTCUSDT")}
         >
-          <option value="BTCUSDT">BTC/USD</option>
-          <option value="ETHUSDT">ETH/USD</option>
-          <option value="XRPUSDT">XRP/USD</option>
-        </select>
-      </div>
-      <div className="dataContainer">
-        <text className="greyText">Last Price</text>
-        <text
-          style={{
-            fontSize: 18,
-            color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62",
-          }}
+          BTC/USD
+        </ToggleOption>
+        <ToggleOption
+          active={symbol === "ETHUSDT"}
+          onClick={() => handleTabChange("ETHUSDT")}
         >
-          {lastPrice}
-        </text>
-      </div>
-      <div className="dataContainer">
-        <text className="greyText">24h Change</text>
-        <div style={{ display: "flex", flexDirection: "row" }}>
-          <text
-            style={{
-              fontSize: 18,
-              color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62",
-            }}
+          ETH/USD
+        </ToggleOption>
+        <ToggleOption
+          active={symbol === "XRPUSDT"}
+          onClick={() => handleTabChange("XRPUSDT")}
+        >
+          XRP/USD
+        </ToggleOption>
+      </ToggleSwitch>
+      <DataContainer>
+        <DataCard>
+          <GreyText>Last Price</GreyText>
+          <DataText
+            style={{ color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62" }}
           >
-            {priceChange}
-          </text>
-          <div>
-            {priceChangePercent >= 0 && (
-              <text style={{ color: "#60BC3F", marginLeft: 8 }}>+</text>
-            )}
-            <text
-              style={{
-                marginLeft: priceChangePercent >= 0 ? 0 : 8,
-                color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62",
-              }}
+            {lastPrice}
+          </DataText>
+        </DataCard>
+        <DataCard>
+          <GreyText>24h Change</GreyText>
+          <DataChange>
+            <DataText
+              style={{ color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62" }}
             >
-              {priceChangePercent}%
-            </text>
-          </div>
-        </div>
-      </div>
-      <div className="dataContainer">
-        <text className="greyText">24h High</text>
-        <text className="text">{dailyHigh}</text>
-      </div>
-      <div className="dataContainer">
-        <text className="greyText">24h Low</text>
-        <text className="text">{dailyLow}</text>
-      </div>
-    </div>
+              {priceChange}
+            </DataText>
+            <div>
+              {priceChangePercent >= 0 && (
+                <ChangeSymbol style={{ color: "#60BC3F" }}>+</ChangeSymbol>
+              )}
+              <DataText
+                style={{
+                  color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62",
+                }}
+              >
+                {priceChangePercent}%
+              </DataText>
+            </div>
+          </DataChange>
+        </DataCard>
+        <DataCard>
+          <GreyText>24h High</GreyText>
+          <DataText>{dailyHigh}</DataText>
+        </DataCard>
+        <DataCard>
+          <GreyText>24h Low</GreyText>
+          <DataText>{dailyLow}</DataText>
+        </DataCard>
+      </DataContainer>
+    </Header>
   )
 }
 
-// chart section
 const ChartSection = ({ symbol }) => {
   return (
-    <div
-      style={{
-        flex: 10,
-        paddingLeft: "3%",
-        paddingRight: "3%",
-        paddingBottom: "3%",
-      }}
-    >
-      {/* <TradingViewWidget
+    <ChartContainer>
+      <TradingViewWidget
         symbol={symbol}
         autosize
-        theme="dark"
+        theme="light"
         studies={["MACD@tv-basicstudies"]}
-      /> */}
-    </div>
+      />
+    </ChartContainer>
   )
 }
+
 export default MiddleGraphsSection
+
+const Section = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 0px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", sans-serif;
+`
+
+const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+`
+
+const ToggleSwitch = styled.div`
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 5px;
+  margin-bottom: 20px;
+`
+
+const ToggleOption = styled.div`
+  padding: 10px 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  background-color: ${props => (props.active ? "#ffffff" : "transparent")};
+  box-shadow: ${props =>
+    props.active ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none"};
+  color: ${props => (props.active ? "#007AFF" : "#777")};
+  font-weight: ${props => (props.active ? "bold" : "normal")};
+`
+
+const DataContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+`
+
+const DataCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px;
+`
+
+const GreyText = styled.span`
+  color: #777;
+  font-size: 14px;
+`
+
+const DataText = styled.span`
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+`
+
+const DataChange = styled.div`
+  display: flex;
+  align-items: center;
+`
+
+const ChangeSymbol = styled.span`
+  font-size: 18px;
+  margin-right: 5px;
+`
+
+const ChartContainer = styled.div`
+  width: 100%;
+  height: 400px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+`
+
+const MenuCardSection = styled.div`
+  width: 100%;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  height: 550px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  font-family: "Roboto", sans-serif;
+`

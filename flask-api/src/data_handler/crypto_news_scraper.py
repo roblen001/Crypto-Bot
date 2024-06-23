@@ -1,5 +1,11 @@
-"""Functions to scrape crypto news site. Requires chromedriver to run.
 """
+Functions to scrape crypto news site. Requires chromedriver to run.
+"""
+from pathlib import Path
+import sys
+# Add project root to sys.path
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root / 'src'))
 
 import requests
 from csv import writer
@@ -7,10 +13,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
-from datetime import datetime
-import emoji
 from datetime import datetime, timedelta
-import time 
+import emoji
 
 class CryptoNewsScraper:
     def __init__(self, webdriver_path: str = "../../chromedriver-win64/chromedriver"):
@@ -25,7 +29,7 @@ class CryptoNewsScraper:
             file_name (str): The name of the file to append to.
             list_of_elem (list): The list of elements to append.
         """
-        with open(file_name, 'a+', newline='') as write_obj:
+        with open(file_name, 'a+', newline='', encoding='utf-8') as write_obj:
             csv_writer = writer(write_obj)
             csv_writer.writerow(list_of_elem)
 
@@ -40,7 +44,10 @@ class CryptoNewsScraper:
         Returns:
             str: The text with all emojis removed.
         """
-        return emoji.replace_emoji(text, replace='')
+        if isinstance(text, str):
+            return emoji.replace_emoji(text, replace='')
+        else:
+            return 'NaN'
 
     @staticmethod
     def strip_whitespace(text):
@@ -83,26 +90,36 @@ class CryptoNewsScraper:
 
         if news_type == 'top':
             url = 'https://cryptonews.net/en/news/top/'
-            csv_file = 'output_data/topNews.csv'
+            csv_file = '../../output_data/topNews.csv'
         elif news_type == 'latest':
             url = 'https://cryptonews.net/en/'
-            csv_file = 'output_data/allNews.csv'
+            csv_file = '../../output_data/allNews.csv'
         else:
-            raise ValueError("Invalid type specified. Must be 'top' or 'latest")
+            raise ValueError("Invalid type specified. Must be 'top' or 'latest'")
         
         if csv_file_path is not None:
             csv_file = csv_file_path
-
+        
         driver = self.initialize_driver()
         driver.get(url)
 
-        df = pd.read_csv(csv_file)
-        df_firstn = df.tail(1)
-
+        try:
+            df = pd.read_csv(csv_file, encoding='utf-8')
+            if df.empty or 'title' not in df.columns:
+                raise pd.errors.EmptyDataError
+            df_firstn = df.tail(1)
+        except (UnicodeDecodeError, pd.errors.EmptyDataError, FileNotFoundError):
+            df = pd.DataFrame(columns=['title', 'link', 'date', 'article'])
+            df_firstn = df
+            self._scrape_initial_articles(driver, csv_file, 10)
+            driver.quit()
+            print(f'scraping completed for {news_type}')
+            return
+        
         self._scrape_news(driver, df, df_firstn, csv_file, time_limit)
 
         driver.quit()
-        print('scraping completed')
+        print(f'scraping completed for {news_type}')
 
     def initialize_driver(self):
         """
@@ -118,6 +135,22 @@ class CryptoNewsScraper:
             raise FileNotFoundError(f"Make sure you installed chrome webdriver and you are pointing to the correct path. "
                                     f"newsscraper is currently looking at {self.webdriver_path} for the webdriver")
 
+    def _scrape_initial_articles(self, driver, csv_file, num_articles):
+        """
+        Scrape the initial number of articles if the CSV file is empty.
+
+        Args:
+            driver (webdriver.Chrome): The WebDriver instance.
+            csv_file (str): The path to the CSV file to save the news data.
+            num_articles (int): The number of articles to scrape.
+        """
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+        title_list, link_list, date_list, text_list = self._extract_news_data(soup)
+
+        for idx in range(min(num_articles, len(title_list))):
+            self.append_list_as_row(csv_file, [title_list[idx], link_list[idx], date_list[idx], text_list[idx]])
+
     def _scrape_news(self, driver, df, df_firstn, csv_file, time_limit):
         """
         Scrape the news articles from the webpage.
@@ -130,10 +163,28 @@ class CryptoNewsScraper:
             time_limit: the max amount of time to scrape for news
         """
         end_time = datetime.now() + timedelta(minutes=time_limit)
+        scraped_titles = set(df['title'].apply(self.clean_text).tolist())
 
-        future = datetime.strptime(str(end_time), "%Y-%m-%d %H:%M:%S.%f")
-        now = datetime.strptime(str(datetime.now()), "%Y-%m-%d %H:%M:%S.%f")
-        while now < future:
+        while datetime.now() < end_time:
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+            title_list, link_list, date_list, text_list = self._extract_news_data(soup)
+
+            new_titles = False
+            for title in title_list:
+                cleaned_title = self.clean_text(title)
+                if cleaned_title in scraped_titles:
+                    new_titles = True
+                    break
+                else:
+                    scraped_titles.add(cleaned_title)
+
+            if new_titles:
+                break
+
+            for idx in range(len(title_list)):
+                self.append_list_as_row(csv_file, [title_list[idx], link_list[idx], date_list[idx], text_list[idx]])
+
             driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
             time.sleep(3)
                         
@@ -143,26 +194,8 @@ class CryptoNewsScraper:
             except Exception as e:
                 print("No 'Show more' button found or unable to click:", e)
 
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-            title_list, link_list, date_list, text_list = self._extract_news_data(soup)
-
-            df = pd.DataFrame(list(zip(title_list, link_list, date_list, text_list)),
-                              columns=['title', 'link', 'date', 'article'])
-
-            for idx in range(len(df['title'])):
-                if len(df_firstn) > 0:
-                    if self.clean_text(df['title'][idx]) == self.clean_text(df_firstn.iloc[0]['title']):
-                        new_df = df.head(idx+1)
-                        reversed_df = new_df.iloc[::-1]
-                        reversed_df.to_csv(csv_file, mode='a', header=False, index=False)
-                        return
-                else:
-                    df_firstn = df
-
         # if the time limit is reached then stop and save
-        reversed_df = df.iloc[::-1]
-        reversed_df.to_csv(csv_file, mode='a', header=False, index=False)
+        print(f"Scraping finished due to time limit or encountering previously scraped title.")
 
     def _extract_news_data(self, soup):
         """
@@ -182,7 +215,7 @@ class CryptoNewsScraper:
         for element in soup.find_all("div", {"class": "row news-item start-xs"}):
             if not element.has_attr('data-article-id'):
                 continue
-            title_list.append(element.find(class_='title').get_text())
+            title_list.append(self.clean_text(element.find(class_='title').get_text()))
             link_list.append(element['data-link'])
 
             for date in element.find_all("span", {"class": "datetime flex middle-xs"}):

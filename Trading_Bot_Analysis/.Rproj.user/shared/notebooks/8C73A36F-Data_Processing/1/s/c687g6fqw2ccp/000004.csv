@@ -1,4 +1,0 @@
-"0","dates <- data.frame(as.Date(as.character(allNews$date)))"
-"0","dates$date <- rev(dates$date)"
-"0","dates <- format(dates, ""%Y-%m"")"
-"0","tail(dates)"

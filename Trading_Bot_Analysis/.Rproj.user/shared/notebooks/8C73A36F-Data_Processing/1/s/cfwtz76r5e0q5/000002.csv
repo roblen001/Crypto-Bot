@@ -1,6 +1,0 @@
-"0","# creating the full news dataset with the missing months"
-"0","allNews <- left_join(allNews, missingNews, 'title') %>%"
-"0","  mutate(link = coalesce(link.y, link.x),"
-"0","         date = coalesce(date.y, date.x),"
-"0","         article = coalesce(article.y, article.x)) %>%"
-"0","  select(-contains('.'))"

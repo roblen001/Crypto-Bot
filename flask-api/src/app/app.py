@@ -1,67 +1,54 @@
 """
-Flask app for the trading agent. These are the backend components for the front-end floder 
+Flask app for the trading agent. These are the backend components for the front-end folder 
 where the trading dashboard interface is located.
 """
+from pathlib import Path
+import sys
+# Add project root to sys.path
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root / 'src'))
+
+import pandas as pd
+from flask import jsonify
+from flask_restful import Resource
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
 
 import pandas as pd
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 from flask_cors import CORS
-from binance.client import Client
-import requests
 from csv import DictWriter
-import time
-import threading
+import subprocess
 from data_handler.crypto_news_scraper import CryptoNewsScraper
 from trading_bot.trading_bot import bot
 import configs.config
-from multiprocessing import Process
+import nltk 
 
-# Initialize Binance client DEPRECATED Binance is banned in Canada
-# api = config.API_KEY
-# secret = config.API_SECRET
-# client = Client(api, secret)
+nltk.download('vader_lexicon')
 
+# Initialize Flask app
 app = Flask(__name__)
 api = Api(app)
 CORS(app)  # Enable CORS
 
-# Background tasks
-def run_top_news_scraper():
-    """Scrapes top news every 30 minutes."""
-    scraper = CryptoNewsScraper()
-    while True:
-        try:
-            scraper.get_crypto_news('top')
-            time.sleep(1800)
-        except:
-            # ADD CODE TO TERMINATE APP HERE
-            raise RuntimeError('failed to start news scraper for top news')
+@app.route("/")
+def home():
+    return "Trading Bot flask app is successfully running."
 
-def run_all_news_scraper():
-    """Scrapes latest news every 15 minutes."""
-    scraper = CryptoNewsScraper()
-    while True:
-        try:
-            scraper.get_crypto_news('latest')
-            time.sleep(900)
-        except:
-            # ADD CODE TO TERMINATE APP HERE
-            raise RuntimeError('failed to start news scraper for latest news')
-
-def trading_bot():
-    """Runs the trading bot."""
-    bot()
+# Function to run a script as a subprocess
+def run_script(script_name):
+    return subprocess.Popen(["python", script_name])
 
 # Start background tasks
-threading.Thread(target=run_top_news_scraper).start()
-threading.Thread(target=run_all_news_scraper).start()
-threading.Thread(target=trading_bot).start()
+run_script("app/run_top_news_scraper.py")
+run_script("app/run_all_news_scraper.py")
+run_script("app/run_trading_bot.py")
 
 class AllTransactionHistory(Resource):
     def get(self, limit):
         """Fetch the transaction history with a limit."""
-        df = pd.read_csv("../../output_data/transaction_history.csv")
+        df = pd.read_csv("output_data/transaction_history.csv")
         limited_data = df.tail(limit).iloc[::-1]
         parsed = limited_data.to_dict(orient="records")
         return parsed
@@ -69,24 +56,50 @@ class AllTransactionHistory(Resource):
 api.add_resource(AllTransactionHistory, "/all_transaction_history/<int:limit>")
 
 class News(Resource):
-    def get(self, type, limit):
+    def get(self, type_, limit):
         """Fetch news articles based on type and limit."""
-        path = f'../../output_data/{type}News.csv'
+        path = f'output_data/{type_}News.csv'
         df = pd.read_csv(path)
+        
+        # Ensure the DataFrame has the correct columns
+        if df.shape[1] != 4:
+            return jsonify({"error": "CSV file format is incorrect. Expected columns: title, link, date, article"}), 400
+        
+        df.fillna("Empty", inplace=True)
+        
+        # Initialize the sentiment analyzer
+        sia = SentimentIntensityAnalyzer()
+        
+        # Define the function to get sentiment from the article
+        def get_sentiment(article):
+            sentiment_score = sia.polarity_scores(article)
+            if sentiment_score['compound'] >= 0.05:
+                return "Positive"
+            elif sentiment_score['compound'] <= -0.05:
+                return "Negative"
+            else:
+                return "Neutral"
+        
+        # Add a sentiment column to the DataFrame
+        df['sentiment'] = df['article'].apply(get_sentiment)
+        
         limited_data = df.tail(limit).iloc[::-1]
-        parsed = limited_data.to_dict(orient="records")
+        parsed = jsonify(limited_data.to_dict(orient="records"))
+        
         return parsed
 
-api.add_resource(News, "/news/<string:type>/<int:limit>")
+api.add_resource(News, "/news/<string:type_>/<int:limit>")
 
 class BotStatistics(Resource):
     def get(self, type):
         """Calculate bot statistics based on type.
         
         Class DEPRECATED because binance is banned in Canada.
+
+        I will use mock data just to keep the front end up and running
         """
         raise DeprecationWarning('Binance is banned in Canada.')
-    
+        
         result = 0
         df = pd.read_csv("../transaction_history.csv")
         if type == 'netprofits':
@@ -156,4 +169,4 @@ class GetBalance(Resource):
 api.add_resource(GetBalance, "/getBalance")
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='localhost', port=5000, debug=False)

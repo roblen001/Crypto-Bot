@@ -1,6 +1,0 @@
-"0","# write.csv(data_set,""E:/erc20transfers_data.csv"", row.names = FALSE)"
-"0","# plot"
-"0","data_set %>%"
-"0","  ggplot( aes(x=date, y=ecr20_transfers)) +"
-"0","    geom_line(color=""#69b3a2"") +"
-"0","  labs(y= ""ecr20 transfers"")"

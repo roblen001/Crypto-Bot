@@ -1,4 +1,0 @@
-"0","# creating and exporting the data that will be used for the sentiment analysis model"
-"0","news_data <- allNews"
-"0","news_data$date <- format(news_data$date, format=""%Y-%m-%d"")"
-"0","head(news_data, 10)"

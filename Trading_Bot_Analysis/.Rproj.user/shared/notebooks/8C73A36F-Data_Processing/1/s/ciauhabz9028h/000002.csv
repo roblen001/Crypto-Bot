@@ -1,2 +1,0 @@
-"0","googletrends$date <- parse_date_time(googletrends$date, orders = ""ymd"")"
-"0","googletrends"

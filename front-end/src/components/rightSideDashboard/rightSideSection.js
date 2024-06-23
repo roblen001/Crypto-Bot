@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react"
 import * as Icon from "react-cryptocoins"
-import Binance from "binance-api-node"
-import axios from "axios"
 import moment from "moment"
 
 // svgs
@@ -9,27 +7,16 @@ import ArrowGain from "../../images/ArrowGain.svg"
 import ArrowLoss from "../../images/ArrowLoss.svg"
 import BNB from "../../images/binance-coin-logo-svg-vector.svg"
 
-// TODO: -only looks for values of USDT
-//       -bot will only be able to trade from UDST (might need to be fixed)
-
-const client = Binance()
-
-// Authenticated client, can make signed calls
-const client2 = Binance({
-  apiKey: process.env.GATSBY_APIKEY,
-  apiSecret: process.env.GATSBY_APISECRET,
-})
-
 const cryptoIcons = [
-  { symbol: "ETH", icon: <Icon.Eth color="white" /> },
-  { symbol: "LTC", icon: <Icon.Ltc color="white" /> },
-  { symbol: "XRP", icon: <Icon.Xrp color="white" /> },
-  { symbol: "BTC", icon: <Icon.Btc color="white" /> },
-  { symbol: "USDT", icon: <Icon.Usdt color="white" /> },
-  { symbol: "ADA", icon: <Icon.Ada color="white" /> },
+  { symbol: "ETH", icon: <Icon.Eth color="black" /> },
+  { symbol: "LTC", icon: <Icon.Ltc color="black" /> },
+  { symbol: "XRP", icon: <Icon.Xrp color="black" /> },
+  { symbol: "BTC", icon: <Icon.Btc color="black" /> },
+  { symbol: "USDT", icon: <Icon.Usdt color="black" /> },
+  { symbol: "ADA", icon: <Icon.Ada color="black" /> },
   {
     symbol: "BNB",
-    icon: <BNB style={{ height: 28, width: 28 }} color="white" />,
+    icon: <BNB style={{ height: 28, width: 28 }} color="black" />,
   },
 ]
 
@@ -79,7 +66,6 @@ const mockData = {
 }
 
 const RightSideSection = () => {
-  // TODO: This needs to be set on the currency that the bot is currently trading
   const [symbol, setSymbol] = useState("BTCUSDT")
   const [netProfits, setNetProfits] = useState(0)
   const [tradesWinRate, setTradesWinRate] = useState(0)
@@ -93,58 +79,19 @@ const RightSideSection = () => {
     setSymbol(event.target.value)
   }
 
-  async function fetchData() {
-    try {
-      const response1 = await axios.get(
-        "http://add created address here/botstatistics/netprofits"
-      )
-      const response2 = await axios.get(
-        "http://add created address here/botstatistics/positivetrades"
-      )
-      const response3 = await axios.get(
-        "http://add created address here/botstatistics/comparestrategy"
-      )
-
-      const response4 = await axios.get(
-        "http://add created address here/botfeeder/feedingHistoryData/8"
-      )
-
-      const response5 = await axios.get(
-        "http://add created address here/botfeeder/totalFed/0"
-      )
-
-      const response6 = await axios.get(
-        "http://add created address here/getBalance"
-      )
-
-      let stat1 = response1.data
-      setNetProfits(stat1.toFixed(2))
-
-      let stat2 = response2.data
-      setTradesWinRate(stat2.toFixed(2))
-
-      let stat3 = response3.data
-      setStrategyCompare(parseFloat(stat3).toFixed(2))
-      // TODO: -trigger this on feed button press
-      let data4 = response4.data
-      setBotFeederHistoricalData(data4)
-
-      let data5 = response5.data
-      setTotalFed(data5)
-
-      let data6 = response6.data
-      setBalance(data6)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
+    setNetProfits((5000.0).toFixed(2)) // Example net profits
+    setTradesWinRate((75.0).toFixed(2)) // Example win rate
+    setStrategyCompare((1000.0).toFixed(2)) // Example strategy compare
+    setBotFeederHistoricalData(mockData2)
+    setTotalFed(12000) // Example total fed
+    setBalance(mockData.balances)
   }, [])
 
   return (
-    <>
+    <div
+      style={{ padding: "20px", backgroundColor: "#e0e0e0", height: "100%" }}
+    >
       {/* feeding station */}
       <div
         style={{
@@ -152,24 +99,50 @@ const RightSideSection = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          marginBottom: "20px",
+          maxHeight: "650px",
+          overflowY: "hidden",
+          position: "relative",
         }}
       >
+        <style>
+          {`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+            .no-scrollbar {
+              -ms-overflow-style: none;  /* IE and Edge */
+              scrollbar-width: none;  /* Firefox */
+            }
+            .scrollable-content {
+              overflow-y: scroll;
+              height: 100%;
+              padding-right: 10px;
+              box-sizing: content-box;
+            }
+          `}
+        </style>
         <p
           style={{
-            marginRight: "60%",
-            color: "white",
-            marginTop: "2%",
-            marginLeft: "5%",
-            marginBottom: "1%",
+            color: "#333",
+            marginTop: "0",
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            fontFamily: "Arial, sans-serif",
           }}
         >
           Feeding Station
         </p>
         <div
           style={{
-            backgroundColor: "rgba(232,236,239,0.2)",
+            backgroundColor: "#e0e0e0",
             width: "100%",
             height: 2,
+            marginBottom: "20px",
           }}
         ></div>
         {/* input section */}
@@ -178,11 +151,10 @@ const RightSideSection = () => {
             height: 50,
             display: "flex",
             flexDirection: "row",
-            color: "white",
+            color: "#333",
             alignItems: "center",
-            justifyContent: "space-evenly",
+            justifyContent: "space-between",
             width: "100%",
-            paddingLeft: "3%",
           }}
         >
           <div
@@ -196,13 +168,19 @@ const RightSideSection = () => {
               style={{
                 display: "flex",
                 flexDirection: "row",
-                marginLeft: "2%",
+                fontFamily: "Arial, sans-serif",
               }}
             >
-              <div style={{ marginRight: "2%" }}>Total Fed:</div>
+              <div style={{ marginRight: "10px" }}>Total Fed:</div>
               <div>{totalFed}$</div>
             </div>
-            <div style={{ color: "white", fontSize: 12, marginLeft: "2%" }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "#777",
+                fontFamily: "Arial, sans-serif",
+              }}
+            >
               *currency is in USD
             </div>
           </div>
@@ -211,14 +189,18 @@ const RightSideSection = () => {
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
+              fontFamily: "Arial, sans-serif",
             }}
           >
-            <div>Feed The Bot:</div>
+            <div style={{ marginRight: "10px" }}>Feed The Bot:</div>
             <input
               style={{
-                width: "20%",
-                marginLeft: "2%",
-                marginRight: "2%",
+                width: "60px",
+                marginRight: "10px",
+                padding: "5px",
+                borderRadius: "5px",
+                border: "1px solid #ddd",
+                fontFamily: "Arial, sans-serif",
               }}
               name="amount"
               type="number"
@@ -231,21 +213,21 @@ const RightSideSection = () => {
               onClick={() => {
                 const currentDate = new Date()
                 const timestamp = currentDate.getTime()
-                // POST request using axios
-                const feed = { amount: inputData, timestamp: timestamp }
 
-                axios
-                  .post(
-                    "http://add created address here/botFeederAddData",
-                    feed
-                  )
-                  .then(res => {
-                    console.log(res.data)
-                  })
+                setBotFeederHistoricalData([
+                  ...botFeederHistoricalData,
+                  { amount: inputData, timestamp: timestamp },
+                ])
                 setInputData(null)
-                // axios
-                //   .get("http://add created ip addy here/botfeeder/feedingHistoryData/8")
-                //   .then(response => setBotFeederHistoricalData(response.data))
+              }}
+              style={{
+                backgroundColor: "#28a745",
+                border: "none",
+                borderRadius: "5px",
+                padding: "5px 10px",
+                color: "white",
+                cursor: "pointer",
+                fontFamily: "Arial, sans-serif",
               }}
             >
               Feed
@@ -254,36 +236,36 @@ const RightSideSection = () => {
         </div>
         <div
           style={{
-            backgroundColor: "rgba(232,236,239,0.2)",
-            width: "90%",
+            backgroundColor: "#e0e0e0",
+            width: "100%",
             height: 2,
+            margin: "20px 0",
           }}
         ></div>
-        {botFeederHistoricalData.map(transaction => {
-          return (
-            <>
-              <SingleFeedingHistoryContainer
-                date={transaction["timestamp"]}
-                amount={transaction["amount"]}
-              />
-              <div
-                style={{
-                  backgroundColor: "rgba(232,236,239,0.2)",
-                  width: "90%",
-                  height: 2,
-                }}
-              ></div>
-            </>
-          )
-        })}
+        <div
+          className="no-scrollbar scrollable-content"
+          style={{ width: "90%" }}
+        >
+          {botFeederHistoricalData.map((transaction, index) => {
+            return (
+              <React.Fragment key={index}>
+                <SingleFeedingHistoryContainer
+                  date={transaction["date"]}
+                  amount={transaction["amount"]}
+                />
+                <div
+                  style={{
+                    backgroundColor: "#e0e0e0",
+                    width: "100%",
+                    height: 2,
+                  }}
+                ></div>
+              </React.Fragment>
+            )
+          })}
+        </div>
       </div>
-      <div
-        style={{
-          backgroundColor: "rgba(232,236,239,0.2)",
-          width: "100%",
-          height: 2,
-        }}
-      ></div>
+
       {/* account information ie Balance and gains section */}
       <div
         style={{
@@ -292,9 +274,13 @@ const RightSideSection = () => {
           alignItems: "center",
           justifyContent: "flex-start",
           flexDirection: "column",
+          backgroundColor: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
-        {/* User Control Section: This section will override the bot ie KILL SWITCH */}
+        {/* User Control Section */}
         <div
           style={{
             marginTop: "5%",
@@ -306,11 +292,15 @@ const RightSideSection = () => {
         >
           <select
             style={{
-              backgroundColor: "#26374C",
-              border: 0,
-              color: "white",
-              width: "26%",
-              fontSize: 25,
+              backgroundColor: "#fff",
+              border: "1px solid #ddd",
+              color: "#333",
+              width: "30%",
+              fontSize: "1rem",
+              borderRadius: "5px",
+              padding: "5px",
+              cursor: "pointer",
+              fontFamily: "Arial, sans-serif",
             }}
             value={symbol}
             onChange={handleSelectChange}
@@ -323,42 +313,54 @@ const RightSideSection = () => {
             style={{
               flexDirection: "row",
               display: "flex",
-              justifyContent: "space-evenly",
-              width: "70%",
-              marginTop: "3%",
-              marginBottom: "3%",
+              justifyContent: "space-between",
+              width: "60%",
+              marginTop: "20px",
             }}
           >
             <button
               style={{
-                backgroundColor: "#60BC3F",
-                borderRadius: 10,
-                width: "30%",
+                backgroundColor: "#28a745",
+                borderRadius: "5px",
+                width: "45%",
+                padding: "10px",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontFamily: "Arial, sans-serif",
               }}
             >
               Start
             </button>
             <button
               style={{
-                backgroundColor: "#DB3E62",
-                borderRadius: 10,
-                width: "30%",
+                backgroundColor: "#dc3545",
+                borderRadius: "5px",
+                width: "45%",
+                padding: "10px",
+                color: "white",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: "bold",
+                fontFamily: "Arial, sans-serif",
               }}
             >
               Stop
             </button>
           </div>
         </div>
+
         {/* Bot Statistics Section */}
-        {/* TODO: these number need to be talking directly to the SQL databse */}
         <div
           style={{
-            color: "white",
+            color: "#333",
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-evenly",
             width: "100%",
-            marginTop: "5%",
+            marginTop: "20px",
+            fontFamily: "Arial, sans-serif",
           }}
         >
           <div
@@ -371,7 +373,8 @@ const RightSideSection = () => {
             <div>Net Profits</div>
             <div
               style={{
-                color: netProfits <= 0 ? "#DB3E62" : "#60BC3F",
+                color: netProfits <= 0 ? "#dc3545" : "#28a745",
+                fontWeight: "bold",
               }}
             >
               {netProfits}$
@@ -387,7 +390,8 @@ const RightSideSection = () => {
             <div>% Positive Trades</div>
             <div
               style={{
-                color: tradesWinRate <= 0 ? "#DB3E62" : "#60BC3F",
+                color: tradesWinRate <= 0 ? "#dc3545" : "#28a745",
+                fontWeight: "bold",
               }}
             >
               {tradesWinRate}%
@@ -403,43 +407,55 @@ const RightSideSection = () => {
             <div>Bot vs Buy and Hold</div>
             <div
               style={{
-                color: strategyCompare <= 0 ? "#DB3E62" : "#60BC3F",
+                color: strategyCompare <= 0 ? "#dc3545" : "#28a745",
+                fontWeight: "bold",
               }}
             >
               {strategyCompare}$
             </div>
           </div>
         </div>
+
         {/* Account Balance Section */}
-        <div style={{ color: "white", marginTop: "5%" }}>Account Balance</div>
+        <div
+          style={{
+            color: "#333",
+            marginTop: "20px",
+            fontWeight: "bold",
+            fontFamily: "Arial, sans-serif",
+          }}
+        >
+          Account Balance
+        </div>
         {balance.map(asset => {
           return (
-            <>
-              <SingleAccountBalance key={asset.asset} asset={asset} />
+            <React.Fragment key={asset.asset}>
+              <SingleAccountBalance asset={asset} />
               <div
                 style={{
-                  backgroundColor: "rgba(232,236,239,0.2)",
+                  backgroundColor: "#e0e0e0",
                   width: "80%",
                   height: 1,
+                  margin: "10px 0",
                 }}
               ></div>
-            </>
+            </React.Fragment>
           )
         })}
       </div>
-    </>
+    </div>
   )
 }
 
 const SingleAccountBalance = ({ asset }) => {
-  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState(0)
+  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState({})
   const symbol = asset.asset + "USDT"
 
-  // getting symbol statistics
   useEffect(() => {
-    if (asset.asset != "USDT") {
-      client.dailyStats({ symbol: symbol }).then(stat => {
-        setDailyStatsForSymbol(stat)
+    if (asset.asset !== "USDT") {
+      setDailyStatsForSymbol({
+        lastPrice: "50000.00", // Example last price
+        priceChangePercent: 2.5, // Example price change percent
       })
     }
   }, [symbol])
@@ -456,6 +472,7 @@ const SingleAccountBalance = ({ asset }) => {
         width: "100%",
         paddingLeft: "5%",
         alignItems: "center",
+        fontFamily: "Arial, sans-serif",
       }}
     >
       <div
@@ -471,49 +488,46 @@ const SingleAccountBalance = ({ asset }) => {
             alignItems: "center",
           }}
         >
-          {/* icon */}
           {cryptoIcons.map(item => {
             if (item.symbol === asset.asset) {
               return item.icon
             }
+            return null
           })}
-          {/* symbol */}
-          <div style={{ color: "white", marginLeft: "7%" }}>{asset.asset}</div>
+          <div style={{ color: "#333", marginLeft: "10px" }}>{asset.asset}</div>
         </div>
-        {/* quantity */}
         <div
           style={{
-            color: "white",
+            color: "#333",
             width: "30%",
             marginRight: "15%",
             display: "flex",
           }}
         >
-          <div style={{ marginRight: "3%" }}>
+          <div style={{ marginRight: "10px" }}>
             {parseFloat(asset.free).toFixed(2)}
           </div>
-          <div> {asset.asset.toLowerCase()}</div>
+          <div>{asset.asset.toLowerCase()}</div>
         </div>
       </div>
       {priceChangePercent >= 0 && <ArrowGain />}
       {priceChangePercent < 0 && <ArrowLoss />}
-      {/* TODO: make sure this is quantiy and not amount in USDT value */}
-      {/* valuation */}
-      {asset.asset != "USDT" && (
+      {asset.asset !== "USDT" && (
         <div
           style={{
-            color: priceChangePercent >= 0 ? "#60BC3F" : "#DB3E62",
-            marginLeft: "1%",
+            color: priceChangePercent >= 0 ? "#28a745" : "#dc3545",
+            marginLeft: "10px",
+            fontWeight: "bold",
           }}
         >
           {(lastPrice * parseFloat(asset.free)).toFixed(2)}
         </div>
       )}
-      {asset.asset == "USDT" && (
+      {asset.asset === "USDT" && (
         <div
           style={{
-            color: "white",
-            marginLeft: "1%",
+            color: "#333",
+            marginLeft: "10px",
           }}
         >
           ---
@@ -531,23 +545,21 @@ const SingleFeedingHistoryContainer = ({ amount, date }) => {
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
-        color: "white",
-        paddingLeft: "2%",
-        width: "100%",
+        color: "#333",
         paddingLeft: "8%",
+        width: "100%",
+        fontFamily: "Arial, sans-serif",
       }}
     >
-      {/* icon and symbol */}
-      <Icon.Usdt color="white" />
+      <Icon.Usdt color="black" />
       <div
         style={{
           width: "12%",
-          paddingLeft: "1%",
+          paddingLeft: "10px",
         }}
       >
         USDT
       </div>
-      {/* amount */}
       <div
         style={{
           display: "flex",
@@ -559,17 +571,14 @@ const SingleFeedingHistoryContainer = ({ amount, date }) => {
       >
         <div
           style={{
-            color: "white",
+            color: "#333",
             fontSize: 12,
           }}
         >
           {amount}$
         </div>
-        <div style={{ color: "#98A9BC", fontSize: 12, marginTop: -4 }}>
-          Amount
-        </div>
+        <div style={{ color: "#777", fontSize: 12, marginTop: -4 }}>Amount</div>
       </div>
-      {/* Date */}
       <div
         style={{
           display: "flex",
@@ -582,17 +591,18 @@ const SingleFeedingHistoryContainer = ({ amount, date }) => {
       >
         <div
           style={{
-            color: "white",
+            color: "#333",
             fontSize: 12,
           }}
         >
-          {moment.unix(date / 1000).format("DD MMM YYYY hh:mm a")}
+          {moment(date, "DD MMM YYYY hh:mm a").format("DD MMM YYYY hh:mm a")}
         </div>
-        <div style={{ color: "#98A9BC", fontSize: 12, marginTop: -4 }}>
+        <div style={{ color: "#777", fontSize: 12, marginTop: -4 }}>
           date and time
         </div>
       </div>
     </div>
   )
 }
+
 export default RightSideSection

@@ -9,11 +9,13 @@ import Seo from "../components/seo"
 import MiddleGraphsSection from "../components/middleDashboard/middleGraphsSection"
 import LeftSideSection from "../components/leftSideDashboard/leftSideSection"
 import RightSideSection from "../components/rightSideDashboard/rightSideSection"
+import StatusCheck from "../components/statusCheck"
 
 const IndexPage = () => (
   <>
     <Seo title="Home" />
-    <div class="wrapper">
+    <StatusCheck />
+    <div className="wrapper">
       {/* left side of dashboard */}
       <div className="sideColumnWrapper">
         <LeftSideSection />
