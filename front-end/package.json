@@ -22,6 +22,7 @@
     "gatsby-plugin-sharp": "^3.4.1",
     "gatsby-source-filesystem": "^3.4.0",
     "gatsby-transformer-sharp": "^3.4.0",
+    "gatsby-cli": "3.15.0",
     "lightweight-charts": "^3.3.0",
     "object-assign-polyfill": "^0.1.0",
     "object.assign": "^4.1.5",

@@ -11,8 +11,8 @@ Email: roberto.lentini@mail.utoronto.ca
 import websocket
 import json
 import configs.config as config 
-from binance.client import Client
-from binance.enums import *
+# from binance.client import Client
+# from binance.enums import *
 from csv import writer
 import pandas as pd
 import smtplib
@@ -25,11 +25,13 @@ import time
 SOCKET = "wss://stream.binance.com:9443/ws/ethusdt@kline_1m"
 
 # Setting up the Binance client
-api = config.API_KEY
-secret = config.API_SECRET
-client = Client(api, secret)
+# api = config.API_KEY
+# secret = config.API_SECRET
+# client = Client(api, secret)
 
-taapi = config.TAAPI
+# uncomment to use rsi trading strategy but then you will need to 
+# create a .env file with an API for https://api.taapi.io
+# taapi = config.TAAPI
 
 TRADE_SYMBOL = 'ETHUSDT'
 TRADE_QUANTITY = 0.05
@@ -51,6 +53,7 @@ def append_list_as_row(file_name, list_of_elem):
 
 def order(side, quantity, symbol, order_type='MARKET'):
     """Place an order on the Binance platform."""
+    raise DeprecationWarning('Binance is no longer active in Canada.')
     try:
         print("sending order")
         order = {

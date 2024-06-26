@@ -224,7 +224,7 @@ const MainContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  background-color: #f0f2f5;
+  /* background-color: #f0f2f5; */
   min-height: 100vh;
 `
 
@@ -232,7 +232,7 @@ const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 800px;
+  /* max-width: 800px; */
 `
 
 const TransactionSection = () => {

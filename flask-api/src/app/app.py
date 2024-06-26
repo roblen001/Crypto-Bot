@@ -48,7 +48,7 @@ run_script("app/run_trading_bot.py")
 class AllTransactionHistory(Resource):
     def get(self, limit):
         """Fetch the transaction history with a limit."""
-        df = pd.read_csv("output_data/transaction_history.csv")
+        df = pd.read_csv("../../output_data/transaction_history.csv")
         limited_data = df.tail(limit).iloc[::-1]
         parsed = limited_data.to_dict(orient="records")
         return parsed
@@ -58,7 +58,7 @@ api.add_resource(AllTransactionHistory, "/all_transaction_history/<int:limit>")
 class News(Resource):
     def get(self, type_, limit):
         """Fetch news articles based on type and limit."""
-        path = f'output_data/{type_}News.csv'
+        path = f'../../output_data/{type_}News.csv'
         df = pd.read_csv(path)
         
         # Ensure the DataFrame has the correct columns

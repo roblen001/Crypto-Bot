@@ -6,9 +6,9 @@ File to fetch and process historical ETH data.
 
 import matplotlib.pyplot as plt
 import csv
-from binance.client import Client
+# from binance.client import Client
 import configs.config
-from binance.enums import *
+# from binance.enums import *
 from datetime import date, datetime
 import time
 import pandas as pd

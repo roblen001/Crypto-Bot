@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"
 import * as Icon from "react-cryptocoins"
 import moment from "moment"
+import styled from 'styled-components';
+
 
 // svgs
 import ArrowGain from "../../images/ArrowGain.svg"
@@ -65,6 +67,16 @@ const mockData = {
   ],
 }
 
+const ResponsiveDiv = styled.div`
+  padding: 10px;
+  height: 100%;
+
+  @media (max-width: 1500px) {
+    padding: 5px;
+    width: 700px;
+  }
+`;
+
 const RightSideSection = () => {
   const [symbol, setSymbol] = useState("BTCUSDT")
   const [netProfits, setNetProfits] = useState(0)
@@ -89,8 +101,7 @@ const RightSideSection = () => {
   }, [])
 
   return (
-    <div
-      style={{ padding: "20px", backgroundColor: "#e0e0e0", height: "100%" }}
+    <ResponsiveDiv
     >
       {/* feeding station */}
       <div
@@ -443,7 +454,7 @@ const RightSideSection = () => {
           )
         })}
       </div>
-    </div>
+    </ResponsiveDiv>
   )
 }
 

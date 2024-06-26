@@ -11,13 +11,16 @@ import requests
 from csv import writer
 import pandas as pd
 from bs4 import BeautifulSoup
-from selenium import webdriver
 import time
 from datetime import datetime, timedelta
 import emoji
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from pathlib import Path
 
 class CryptoNewsScraper:
-    def __init__(self, webdriver_path: str = "../../chromedriver-win64/chromedriver"):
+    def __init__(self, webdriver_path: str = "../../chromedriver-win64/chromedriver.exe"):
         self.webdriver_path = webdriver_path
 
     @staticmethod
@@ -129,8 +132,14 @@ class CryptoNewsScraper:
             webdriver.Chrome: The initialized WebDriver.
         """
         try:
-            driver = webdriver.Chrome(self.webdriver_path)
+            service = Service(self.webdriver_path)
+
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+
+            driver = webdriver.Chrome(service=service, options=chrome_options)
             return driver
+
         except Exception as e:
             raise FileNotFoundError(f"Make sure you installed chrome webdriver and you are pointing to the correct path. "
                                     f"newsscraper is currently looking at {self.webdriver_path} for the webdriver")
