@@ -1,6 +1,5 @@
 """Scrape the top news. Seperate file to run as a subprocess
 """
-
 import sys
 from pathlib import Path
 
@@ -17,8 +16,10 @@ def run_top_news_scraper():
     while True:
         try:
             scraper.get_crypto_news('top')
+            print("Scraped top news", flush=True)
             time.sleep(1800)
-        except:
+        except Exception as e:
+            print(f'Error: {e}', flush=True)
             raise RuntimeError('failed to start news scraper for top news')
 
 if __name__ == "__main__":

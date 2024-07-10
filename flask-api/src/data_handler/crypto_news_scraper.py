@@ -20,7 +20,7 @@ from selenium.webdriver.chrome.options import Options
 from pathlib import Path
 
 class CryptoNewsScraper:
-    def __init__(self, webdriver_path: str = "../../chromedriver-win64/chromedriver.exe"):
+    def __init__(self, webdriver_path: str = "/usr/local/bin/chromedriver"):
         self.webdriver_path = webdriver_path
 
     @staticmethod
@@ -90,19 +90,18 @@ class CryptoNewsScraper:
             time_limit: the max amount of time to scrape for news
         """
         print('scraper online:', news_type)
-
         if news_type == 'top':
             url = 'https://cryptonews.net/en/news/top/'
-            csv_file = '../../output_data/topNews.csv'
+            csv_file = '/app/output_data/topNews.csv'
         elif news_type == 'latest':
             url = 'https://cryptonews.net/en/'
-            csv_file = '../../output_data/allNews.csv'
+            csv_file = '/app/output_data/allNews.csv'
         else:
             raise ValueError("Invalid type specified. Must be 'top' or 'latest'")
         
         if csv_file_path is not None:
             csv_file = csv_file_path
-        
+
         driver = self.initialize_driver()
         driver.get(url)
 
@@ -136,6 +135,9 @@ class CryptoNewsScraper:
 
             chrome_options = Options()
             chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument("--disable-gpu")
 
             driver = webdriver.Chrome(service=service, options=chrome_options)
             return driver

@@ -38,7 +38,10 @@ def home():
 
 # Function to run a script as a subprocess
 def run_script(script_name):
-    return subprocess.Popen(["python", script_name])
+    # Run the subprocess
+    print(f'Starting subprocess for {script_name}...')
+    process = subprocess.Popen(["python", script_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    print(f'Subprocess for {script_name} started, now reading its output...')
 
 # Start background tasks
 run_script("app/run_top_news_scraper.py")
@@ -169,4 +172,4 @@ class GetBalance(Resource):
 api.add_resource(GetBalance, "/getBalance")
 
 if __name__ == "__main__":
-    app.run(host='localhost', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False)
