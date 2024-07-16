@@ -4,15 +4,15 @@ where the trading dashboard interface is located.
 """
 from pathlib import Path
 import sys
-# Add project root to sys.path
-project_root = Path(__file__).resolve().parents[2]
-sys.path.append(str(project_root / 'src'))
 
 import pandas as pd
 from flask import jsonify
 from flask_restful import Resource
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+# Add project root to sys.path
+project_root = Path(__file__).resolve().parents[2]
+sys.path.append(str(project_root / 'src'))
 
 import pandas as pd
 from flask import Flask, jsonify, request
@@ -51,7 +51,7 @@ run_script("app/run_trading_bot.py")
 class AllTransactionHistory(Resource):
     def get(self, limit):
         """Fetch the transaction history with a limit."""
-        df = pd.read_csv("../../output_data/transaction_history.csv")
+        df = pd.read_csv("/app/output_data/transaction_history.csv")
         limited_data = df.tail(limit).iloc[::-1]
         parsed = limited_data.to_dict(orient="records")
         return parsed
@@ -61,7 +61,7 @@ api.add_resource(AllTransactionHistory, "/all_transaction_history/<int:limit>")
 class News(Resource):
     def get(self, type_, limit):
         """Fetch news articles based on type and limit."""
-        path = f'../../output_data/{type_}News.csv'
+        path = f'/app/output_data/{type_}News.csv'
         df = pd.read_csv(path)
         
         # Ensure the DataFrame has the correct columns
@@ -137,11 +137,11 @@ class BotFeeder(Resource):
     def get(self, type, limit):
         """Fetch feeding history data or total fed amount based on type and limit."""
         if type == 'feedingHistoryData':
-            df = pd.read_csv('../../output_data/feedingHistoryData.csv')
+            df = pd.read_csv('app/output_data/feedingHistoryData.csv')
             limited_data = df.tail(limit).iloc[::-1]
             result = limited_data.to_dict(orient="records")
         elif type == 'totalFed':
-            df = pd.read_csv('../../output_data/feedingHistoryData.csv')
+            df = pd.read_csv('app/output_data/feedingHistoryData.csv')
             result = int(df['amount'].sum())
         return result
 
@@ -150,10 +150,9 @@ api.add_resource(BotFeeder, "/botfeeder/<string:type>/<int:limit>")
 class BotFeederAddData(Resource):
     def post(self):
         """Add data to the feeding history."""
-        with open('../../output_data/feedingHistoryData.csv', 'a') as f_object:
+        with open('app/output_data/feedingHistoryData.csv', 'a') as f_object:
             dictwriter_object = DictWriter(f_object, fieldnames=['amount', 'timestamp'])
             dictwriter_object.writerow(request.get_json(force=True))
-            f_object.close()
         return 'data added'
 
 api.add_resource(BotFeederAddData, "/botFeederAddData")

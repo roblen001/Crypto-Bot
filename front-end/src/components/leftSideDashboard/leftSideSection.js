@@ -266,7 +266,8 @@ const TransactionSection = () => {
 
 const SingleTransactionContainer = ({ transaction }) => {
   const icon_name = transaction.symbol
-  console.log(cryptoIcons[icon_name])
+  console.log(transaction)
+  console.log(icon_name)
 
   return (
     <TransactionContainer>

@@ -87,6 +87,9 @@ COPY front-end/public ./public
 # Build the Gatsby site
 RUN npm run build
 
+# Change the working directory back to /app
+WORKDIR /app
+
 # Expose the ports that the Flask and Gatsby apps run on
 EXPOSE 5000 8000
 

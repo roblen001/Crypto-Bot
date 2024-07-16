@@ -224,7 +224,6 @@ const RightSideSection = () => {
               onClick={() => {
                 const currentDate = new Date()
                 const timestamp = currentDate.getTime()
-
                 setBotFeederHistoricalData([
                   ...botFeederHistoricalData,
                   { amount: inputData, timestamp: timestamp },
@@ -549,6 +548,7 @@ const SingleAccountBalance = ({ asset }) => {
 }
 
 const SingleFeedingHistoryContainer = ({ amount, date }) => {
+  console.log(date)
   return (
     <div
       style={{
@@ -606,7 +606,7 @@ const SingleFeedingHistoryContainer = ({ amount, date }) => {
             fontSize: 12,
           }}
         >
-          {moment(date, "DD MMM YYYY hh:mm a").format("DD MMM YYYY hh:mm a")}
+          {date}
         </div>
         <div style={{ color: "#777", fontSize: 12, marginTop: -4 }}>
           date and time

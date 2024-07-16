@@ -26,7 +26,7 @@ class MenuCard extends Component {
 
   render() {
     return (
-      <div className="tradingview-widget-container" ref={this.myRef}>
+      <div className="tradingview-widget-container" style={{ height: "400px"}} ref={this.myRef}>
         <div className="tradingview-widget-container__widget"></div>
       </div>
     )

@@ -1,32 +1,28 @@
-import React, { useState, useEffect } from "react"
-import TradingViewWidget from "react-tradingview-widget"
-import Binance from "binance-api-node"
-import styled from "styled-components"
-import MenuCard from "./MenuCard"
+import React, { useState, useEffect } from "react";
+import Binance from "binance-api-node";
+import styled from "styled-components";
+import MenuCard from "./MenuCard";
+import TradingViewWidget from "./TradingViewWidget"; // Import the TradingViewWidget component
 
-const client = Binance()
-const client2 = Binance({
-  apiKey: process.env.GATSBY_APIKEY,
-  apiSecret: process.env.GATSBY_APISECRET,
-})
+const client = Binance();
 
 const MiddleGraphsSection = () => {
-  const [symbol, setSymbol] = useState("BTCUSDT")
-  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState({})
+  const [symbol, setSymbol] = useState("BTCUSDT");
+  const [dailyStatsForSymbol, setDailyStatsForSymbol] = useState({});
 
   useEffect(() => {
-    client.dailyStats({ symbol: symbol }).then(stat => {
-      setDailyStatsForSymbol(stat)
-    })
-  }, [symbol])
+    client.dailyStats({ symbol }).then(stat => {
+      setDailyStatsForSymbol(stat);
+    }).catch(error => {
+      console.error('Error fetching daily stats:', error);
+    });
+  }, [symbol]);
 
-  const dailyHigh = parseFloat(dailyStatsForSymbol.highPrice || 0).toFixed(2)
-  const dailyLow = parseFloat(dailyStatsForSymbol.lowPrice || 0).toFixed(2)
-  const priceChangePercent = dailyStatsForSymbol.priceChangePercent || 0
-  const priceChange = parseFloat(dailyStatsForSymbol.priceChange || 0).toFixed(
-    2
-  )
-  const lastPrice = parseFloat(dailyStatsForSymbol.lastPrice || 0).toFixed(2)
+  const dailyHigh = parseFloat(dailyStatsForSymbol.highPrice || 0).toFixed(2);
+  const dailyLow = parseFloat(dailyStatsForSymbol.lowPrice || 0).toFixed(2);
+  const priceChangePercent = dailyStatsForSymbol.priceChangePercent || 0;
+  const priceChange = parseFloat(dailyStatsForSymbol.priceChange || 0).toFixed(2);
+  const lastPrice = parseFloat(dailyStatsForSymbol.lastPrice || 0).toFixed(2);
 
   return (
     <Section>
@@ -44,8 +40,8 @@ const MiddleGraphsSection = () => {
         <MenuCard />
       </MenuCardSection>
     </Section>
-  )
-}
+  );
+};
 
 const TopHeaderSection = ({
   setSymbol,
@@ -57,8 +53,8 @@ const TopHeaderSection = ({
   priceChange,
 }) => {
   const handleTabChange = tab => {
-    setSymbol(tab)
-  }
+    setSymbol(tab);
+  };
 
   return (
     <Header>
@@ -123,23 +119,14 @@ const TopHeaderSection = ({
         </DataCard>
       </DataContainer>
     </Header>
-  )
-}
+  );
+};
 
 const ChartSection = ({ symbol }) => {
-  return (
-    <ChartContainer>
-      <TradingViewWidget
-        symbol={symbol}
-        autosize
-        theme="light"
-        studies={["MACD@tv-basicstudies"]}
-      />
-    </ChartContainer>
-  )
-}
+  return symbol ? <TradingViewWidget symbol={symbol} /> : null;
+};
 
-export default MiddleGraphsSection
+export default MiddleGraphsSection;
 
 const Section = styled.div`
   display: flex;
@@ -150,7 +137,7 @@ const Section = styled.div`
   border-radius: 0px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   font-family: "Roboto", sans-serif;
-`
+`;
 
 const Header = styled.div`
   display: flex;
@@ -162,7 +149,7 @@ const Header = styled.div`
   border-radius: 15px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-`
+`;
 
 const ToggleSwitch = styled.div`
   display: flex;
@@ -170,24 +157,23 @@ const ToggleSwitch = styled.div`
   border-radius: 20px;
   padding: 5px;
   margin-bottom: 20px;
-`
+`;
 
 const ToggleOption = styled.div`
   padding: 10px 20px;
   border-radius: 15px;
   cursor: pointer;
   background-color: ${props => (props.active ? "#ffffff" : "transparent")};
-  box-shadow: ${props =>
-    props.active ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none"};
+  box-shadow: ${props => (props.active ? "0 2px 4px rgba(0, 0, 0, 0.1)" : "none")};
   color: ${props => (props.active ? "#007AFF" : "#777")};
   font-weight: ${props => (props.active ? "bold" : "normal")};
-`
+`;
 
 const DataContainer = styled.div`
   display: flex;
   justify-content: space-around;
   width: 100%;
-`
+`;
 
 const DataCard = styled.div`
   display: flex;
@@ -198,28 +184,28 @@ const DataCard = styled.div`
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: 10px;
-`
+`;
 
 const GreyText = styled.span`
   color: #777;
   font-size: 14px;
-`
+`;
 
 const DataText = styled.span`
   color: #333;
   font-size: 18px;
   font-weight: bold;
-`
+`;
 
 const DataChange = styled.div`
   display: flex;
   align-items: center;
-`
+`;
 
 const ChangeSymbol = styled.span`
   font-size: 18px;
   margin-right: 5px;
-`
+`;
 
 const ChartContainer = styled.div`
   width: 100%;
@@ -228,7 +214,7 @@ const ChartContainer = styled.div`
   border-radius: 15px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-`
+`;
 
 const MenuCardSection = styled.div`
   width: 100%;
@@ -238,4 +224,4 @@ const MenuCardSection = styled.div`
   height: 550px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   font-family: "Roboto", sans-serif;
-`
+`;
