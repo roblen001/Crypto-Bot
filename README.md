@@ -1,8 +1,12 @@
 # Crypto Bot Project
 
-This project is a reinforcement learning trading agent that integrates a Flask API with a Gatsby-based front-end dashboard. The Flask API scrapes news data and allows the trading agent to operate continuously, while the front-end dashboard provides a real-time view of the trading activities.
+This project is a reinforcement learning trading agent (trading agent back-end repository: https://github.com/roblen001/reinforcement_learning_trading_agent) that integrates a Flask API with a Gatsby-based front-end dashboard. The Flask API scrapes news data and allows the trading agent to operate continuously, while the front-end dashboard provides a real-time view of the trading activities.
 
-![Project Image](https://user-images.githubusercontent.com/51753527/147854745-9ec9bac7-174a-4328-a6ab-7ded6c47893c.png)
+![image](https://github.com/user-attachments/assets/1a783ba0-6352-4573-9602-76e089a6c9c9)
+
+## Overview
+
+This project is designed to run on a Raspberry Pi 24/7, scraping news data and enabling continuous trading. The front-end dashboard, which can be started with `gatsby develop`, provides a visual interface for monitoring the bot's trading performance.
 
 ## Quick Start with Docker
 
@@ -22,114 +26,6 @@ To quickly start the project using Docker, follow these steps from the root dire
     ```bash
     docker run -p 5000:5000 -p 8000:8000 gatsby-flask-app
     ```
-
-### What the Docker Image Does
-
-The Docker image is configured to:
-
-1. **Use the Official Python Image**: 
-    ```dockerfile
-    FROM python:3.9-slim
-    ```
-
-2. **Set the Working Directory**: 
-    ```dockerfile
-    WORKDIR /app
-    ```
-
-3. **Install Dependencies**: 
-    ```dockerfile
-    RUN apt-get update && apt-get install -y \
-        wget \
-        unzip \
-        curl \
-        gnupg \
-        bash \
-        libnss3 \
-        libgconf-2-4 \
-        libxi6 \
-        libgbm1 \
-        libx11-xcb1 \
-        libxcb1 \
-        libxcomposite1 \
-        libxcursor1 \
-        libxdamage1 \
-        libxext6 \
-        libxfixes3 \
-        libxrandr2 \
-        libxtst6 \
-        libasound2 \
-        xdg-utils \
-        fonts-liberation \
-        libappindicator3-1 \
-        lsb-release \
-        --no-install-recommends
-    ```
-
-4. **Install Google Chrome and ChromeDriver**: 
-    ```dockerfile
-    RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-        apt-get update && \
-        apt-get install -y google-chrome-stable
-
-    RUN wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/126.0.6478.126/linux64/chromedriver-linux64.zip && \
-        unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
-        mv /usr/local/bin/chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
-        chmod +x /usr/local/bin/chromedriver && \
-        rm /tmp/chromedriver.zip
-    ```
-
-5. **Install Python Dependencies**: 
-    ```dockerfile
-    COPY flask-api/requirements.txt /app/flask-api/
-    RUN pip install --no-cache-dir -r /app/flask-api/requirements.txt
-    ```
-
-6. **Copy Application Code**: 
-    ```dockerfile
-    COPY flask-api/src/ /app/flask-api/src
-    COPY output_data /app/output_data
-    ```
-
-7. **Install Node.js and Gatsby CLI**: 
-    ```dockerfile
-    RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-        apt-get install -y nodejs && \
-        npm install -g gatsby-cli
-    ```
-
-8. **Set Up Gatsby Front-End**: 
-    ```dockerfile
-    WORKDIR /app/front-end
-    COPY front-end/package.json front-end/package-lock.json ./
-    RUN npm install --legacy-peer-deps
-    COPY front-end/gatsby-browser.js ./
-    COPY front-end/gatsby-config.js ./
-    COPY front-end/gatsby-node.js ./
-    COPY front-end/gatsby-ssr.js ./
-    COPY front-end/.prettierrc ./
-    COPY front-end/.prettierignore ./
-    COPY front-end/src ./src
-    COPY front-end/public ./public
-    RUN npm run build
-    ```
-
-9. **Expose Ports**: 
-    ```dockerfile
-    EXPOSE 5000 8000
-    ```
-
-10. **Set Up Start Script**: 
-    ```dockerfile
-    COPY start.sh /app/start.sh
-    RUN chmod +x /app/start.sh
-    CMD ["/app/start.sh"]
-    ```
-
-## Overview
-
-This project is designed to run on a Raspberry Pi 24/7, scraping news data and enabling continuous trading. The front-end dashboard, which can be started with `gatsby develop`, provides a visual interface for monitoring the bot's trading performance.
 
 ### Project Structure
 
