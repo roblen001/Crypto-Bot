@@ -1,4 +1,3 @@
-```markdown
 # Crypto Bot Project
 
 This project is a reinforcement learning trading agent that integrates a Flask API with a Gatsby-based front-end dashboard. The Flask API scrapes news data and allows the trading agent to operate continuously, while the front-end dashboard provides a real-time view of the trading activities.
@@ -224,4 +223,3 @@ Contributions are welcome! Please fork the repository and submit a pull request.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
