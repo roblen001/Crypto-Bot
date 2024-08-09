@@ -21,7 +21,7 @@ To quickly start the project using Docker, follow these steps from the root dire
 2. **Build Docker Image**:
 
    ```bash
-   docker build -t gatsby-flask-app .
+   docker build --no-cache -t gatsby-flask-app .
    ```
 
 3. **Run Docker Container**:
