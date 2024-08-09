@@ -17,7 +17,7 @@ To quickly start the project using Docker, follow these steps from the root dire
    ```bash
    git clone https://github.com/roblen001/Crypto-Bot.git
    ```
-2.    ```bash
+2. ```bash
    cd Crypto-Bot
    ```
 3. **Build Docker Image**:
