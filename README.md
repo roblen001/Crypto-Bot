@@ -13,19 +13,24 @@ This project is designed to run on a Raspberry Pi 24/7, scraping news data and e
 To quickly start the project using Docker, follow these steps from the root directory of the project:
 
 1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/roblen001/Crypto-Bot.git
-    ```
+
+   ```bash
+   git clone https://github.com/roblen001/Crypto-Bot.git
+   ```
 
 2. **Build Docker Image**:
-    ```bash
-    docker build -t gatsby-flask-app .
-    ```
+
+   ```bash
+   docker build -t gatsby-flask-app .
+   ```
 
 3. **Run Docker Container**:
-    ```bash
-    docker run -p 5000:5000 -p 8000:8000 gatsby-flask-app
-    ```
+
+   ```bash
+   docker run -p 5000:5000 -p 8000:8000 gatsby-flask-app
+   ```
+
+4. Head to http://localhost:8000/ on your favorite browser
 
 ### Project Structure
 
@@ -82,35 +87,38 @@ I highly encourage people to dig in and modify the app and the strategies. I enc
 ### Installation
 
 1. **Clone the Repository**:
-    ```bash
-    git clone https://github.com/roblen001/Crypto-Bot.git
-    ```
+
+   ```bash
+   git clone https://github.com/roblen001/Crypto-Bot.git
+   ```
 
 2. **Set Up Flask API**:
-    ```bash
-    cd flask-api
-    pip install -r requirements.txt
-    ```
+
+   ```bash
+   cd flask-api
+   pip install -r requirements.txt
+   ```
 
 3. **Set Up Front-End**:
-    ```bash
-    cd ../front-end
-    npm install
-    ```
+   ```bash
+   cd ../front-end
+   npm install
+   ```
 
 ### Running the Project without Docker
 
 1. **Start Flask API**:
-    ```bash
-    cd flask-api/src/app
-    python app.py
-    ```
+
+   ```bash
+   cd flask-api/src/app
+   python app.py
+   ```
 
 2. **Start Front-End**:
-    ```bash
-    cd front-end
-    gatsby develop
-    ```
+   ```bash
+   cd front-end
+   gatsby develop
+   ```
 
 ## Contributing
 

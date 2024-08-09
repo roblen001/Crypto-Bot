@@ -81,8 +81,8 @@ COPY front-end/.prettierignore ./
 # Copy the src directory separately
 COPY front-end/src ./src
 
-# Copy the public directory separately
-COPY front-end/public ./public
+# Copy the start script into the container
+COPY start.sh /app/start.sh
 
 # Build the Gatsby site
 RUN npm run build
@@ -93,8 +93,6 @@ WORKDIR /app
 # Expose the ports that the Flask and Gatsby apps run on
 EXPOSE 5000 8000
 
-# Copy the start script into the container
-COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Specify the command to run the start script
