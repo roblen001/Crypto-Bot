@@ -21,6 +21,7 @@ To quickly start the project using Docker, follow these steps from the root dire
 2. **Build Docker Image**:
 
    ```bash
+   cd Crypto-Bot
    docker build --no-cache -t gatsby-flask-app .
    ```
 
@@ -29,11 +30,7 @@ To quickly start the project using Docker, follow these steps from the root dire
    ```bash
    docker run -p 5000:5000 -p 8000:8000 gatsby-flask-app
    ```
-4. 
- ```bash
-   cd Crypto-Bot
-   ```
-5. Head to http://localhost:8000/ on your favorite browser
+4. Head to http://localhost:8000/ on your favorite browser
 
 ### Project Structure
 
